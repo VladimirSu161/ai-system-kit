@@ -1,0 +1,12 @@
+{
+  "name": "zen-infographic",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HTML→PNG infographics for Yandex.Zen articles in AI BASE style",
+  "scripts": {
+    "render": "node scripts/render.js"
+  },
+  "dependencies": {
+    "puppeteer": "^23.11.1"
+  }
+}
