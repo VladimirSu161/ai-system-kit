@@ -18,7 +18,7 @@
 |---|---|---|
 | Модуль 2 — Установка, CLAUDE.md и память | [module-02](module-02/) | скилл `claude-md-writer` + 5 промптов к урокам |
 | Модуль 3 — Профиль личности и структура системы | [module-03](module-03/) | скилл `profile` + 3 промпта к урокам |
-| Модуль 10 — Конвейер статей | [module-10](module-10/) | скиллы `articles-v2`, `yandex-wordstat`, `zen-infographic` + методичка и инструкции |
+| Модуль 4 — Конвейер статей | [module-04](module-04/) | скиллы `articles-v2`, `zen-infographic`, `yandex-wordstat` + методичка и мастер настройки под свой канал |
 
 ## Важно
 
