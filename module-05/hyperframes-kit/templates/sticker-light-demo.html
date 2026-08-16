@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!-- ══════════════════════════════════════════════════════════════
+     СМОУК-ТЕСТ темы sticker-light (НЕ шаблон видео — см. new-video-light.html).
+     Позы персонажа заменены серыми силуэтами: проверяем зоны, карточки,
+     терминал, караоке с маркером/красным, poseSwap, аннотацию drawPath.
+     Рендер: npx --yes hyperframes@0.7.26 render -c templates/sticker-light-demo.html
+     ══════════════════════════════════════════════════════════════ -->
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="shared/sticker-light.css">
+<script src="shared/helpers.js"></script>
+<style>
+/* сценоспецифичное демо */
+.demo-silhouette { position:absolute; left:0; top:0; width:100%; height:100%; opacity:0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 80%, transparent 98%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 80%, transparent 98%); }
+#demo-check-card { width: 700px; }
+#demo-term { width: 780px; }
+</style>
+</head>
+<body>
+<div id="root" class="clip"
+     data-composition-id="root"
+     data-width="1080" data-height="1920"
+     data-start="0" data-duration="17.3">
+
+  <div class="floor-grid"></div>
+  <div class="ui-scrim"></div>
+
+  <!-- ═══ S1: карточка-чеклист (0–4с) ═══ -->
+  <div id="s1" class="scene clip" data-start="0" data-duration="4.4" data-track-index="1">
+    <div class="info-zone">
+      <div id="s1-chip" class="topic-chip" style="opacity:0;">Монтаж</div>
+      <div id="s1-card" class="ios-card" style="opacity:0; width:700px;">
+        <div class="ios-card-head">
+          <div class="ico-squircle">🎬</div>
+          <div>
+            <div class="ios-card-title">Что нужно</div>
+            <div class="ios-card-sub">для таких видео</div>
+          </div>
+        </div>
+        <div id="s1-r1" class="check-row" style="opacity:0;"><span class="check-ico" style="background:var(--blue);">⏱</span> время</div>
+        <div id="s1-r2" class="check-row" style="opacity:0;"><span class="check-ico" style="background:var(--orange);">⏳</span> терпение</div>
+        <div id="s1-r3" class="check-row" style="opacity:0;"><span class="check-ico" style="background:var(--purple);">🧠</span> голова</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ S2: терминал + стикер с аннотацией (4–8с) ═══ -->
+  <div id="s2" class="scene clip" data-start="3.9" data-duration="4.1" data-track-index="2">
+    <div class="info-zone">
+      <div id="s2-term" class="terminal" style="opacity:0;">
+        <div class="term-head">
+          <span class="term-dot" style="background:#FF5F57;"></span>
+          <span class="term-dot" style="background:#FEBC2E;"></span>
+          <span class="term-dot" style="background:#28C840;"></span>
+          <span class="term-title">терминал</span>
+        </div>
+        <div>$ <span id="s2-cmd"></span><span class="caret"></span></div>
+        <div id="s2-out" class="term-dim" style="opacity:0;">видео собирается из кода</div>
+      </div>
+      <div class="sticker-col" style="margin-top:36px; position:relative;">
+        <div id="s2-sticker" class="sticker" style="font-size:120px; opacity:0;">🚀</div>
+        <div id="s2-tag" class="tag tag-blue" style="opacity:0;">масштаб</div>
+        <svg id="s2-ann" width="320" height="230" viewBox="0 0 320 230"
+             style="position:absolute; left:50%; top:45%; transform:translate(-50%,-50%); overflow:visible; pointer-events:none;">
+          <path id="s2-ann-path" class="ann-stroke"
+                d="M160 18 C 258 10, 306 62, 300 114 C 294 176, 216 214, 150 210 C 76 206, 16 168, 22 106 C 28 44, 96 12, 178 24"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ S3: статус-бары + календарь + табы (8–12с, паттерны P8/P11) ═══ -->
+  <div id="s3" class="scene clip" data-start="7.9" data-duration="4.3" data-track-index="3">
+    <div class="info-zone">
+      <div id="s3-bars" class="ios-card" style="opacity:0; width:820px;">
+        <div class="ios-card-head" style="margin-bottom:14px;">
+          <div class="ico-squircle" style="background:var(--green);">📈</div>
+          <div>
+            <div class="ios-card-title">Заходы новичка</div>
+            <div class="ios-card-sub">по неделям</div>
+          </div>
+        </div>
+        <div class="bar-row" id="s3-r1" style="opacity:0;">
+          <div class="bar-label">первая</div>
+          <div class="bar-track"><div class="bar-fill" id="s3-f1" style="background:var(--green);"></div></div>
+          <div class="bar-pct" id="s3-p1" style="color:var(--green);">0 %</div>
+        </div>
+        <div class="bar-row" id="s3-r2" style="opacity:0;">
+          <div class="bar-label">вторая</div>
+          <div class="bar-track"><div class="bar-fill" id="s3-f2" style="background:var(--orange);"></div></div>
+          <div class="bar-pct" id="s3-p2" style="color:var(--orange);">0 %</div>
+        </div>
+        <div class="bar-row" id="s3-r3" style="opacity:0; margin-bottom:0;">
+          <div class="bar-label">третья</div>
+          <div class="bar-track"><div class="bar-fill" id="s3-f3" style="background:var(--red);"></div></div>
+          <div class="bar-pct" id="s3-p3" style="color:var(--red);">0 %</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:40px; margin-top:36px;">
+        <div id="s3-cal" class="cal-card" style="opacity:0;">
+          <div class="cal-month">Июль</div>
+          <div class="cal-day">27</div>
+          <div class="cal-sub">последнее действие</div>
+        </div>
+        <div id="s3-tabs" class="tab-row" style="opacity:0;">
+          <div class="tab active">High</div>
+          <div class="tab">Extra</div>
+          <div class="tab">Max</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ S4: цветная глава (12–14с, паттерн P10) ═══ -->
+  <div id="s4" class="scene clip" data-start="11.9" data-duration="2.1" data-track-index="4">
+    <div id="s4-bg" class="chapter chapter-blue" style="opacity:0;"></div>
+    <div id="s4-word" class="chapter-word" style="opacity:0;">Глава 2</div>
+  </div>
+
+  <!-- ═══ S5: CTA — скрин канала + кнопка с курсором-кликом (14–17.5с) ═══ -->
+  <div id="s5" class="scene clip" data-start="13.9" data-duration="3.4" data-track-index="5">
+    <div class="info-zone">
+      <div id="s5-card" class="cta-card-light" style="opacity:0; width:720px;">
+        <div style="display:flex; align-items:center; gap:24px; margin-bottom:30px;">
+          <div class="tg-squircle-light" id="s5-icon">
+            <svg width="52" height="52" viewBox="0 0 240 240" fill="none">
+              <path d="M120 0C53.7 0 0 53.7 0 120s53.7 120 120 120 120-53.7 120-120S186.3 0 120 0zm59.2 81.8l-20.2 95.2c-1.5 6.7-5.4 8.3-10.9 5.2l-30-22.1-14.5 13.9c-1.6 1.6-2.9 2.9-6 2.9l2.1-30.3 55.2-49.9c2.4-2.1-.5-3.3-3.7-1.2l-68.2 42.9-29.4-9.2c-6.4-2-6.5-6.4 1.3-9.5l114.8-44.3c5.3-2 10 1.3 9.5 6.4z" fill="#26A5E4"/>
+            </svg>
+          </div>
+          <div style="text-align:left;">
+            <div id="s5-handle" style="opacity:0; white-space:nowrap; font-size:38px; font-weight:900; color:var(--ink); line-height:1;">@ваш_канал · Telegram</div>
+            <div id="s5-desc" style="opacity:0; font-size:25px; color:var(--muted); margin-top:10px;">AI-инструменты, скиллы и автоматизации</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:26px;">
+          <div id="s5-shot" class="tg-shot" style="opacity:0;">
+            <img src="assets/cta/tg-channel.jpg">
+          </div>
+          <div id="s5-btn" class="tg-btn" style="opacity:0;">Подписаться</div>
+        </div>
+      </div>
+      <svg id="s5-cursor" class="tg-cursor" viewBox="0 0 24 30" style="opacity:0; left:620px; top:640px;">
+        <path d="M4 2 L4 24 L10 19 L14 28 L18 26 L14 17 L21 16 Z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ═══ Персонаж: реальные позы из банка, живёт весь ролик ═══ -->
+  <div id="char" class="char-zone clip" data-start="0" data-duration="17.3" data-track-index="10">
+    <img id="pose-a" class="pose" src="assets/character/pose-base.png">
+    <img id="pose-b" class="pose" src="assets/character/pose-stop.png">
+    <img id="pose-c" class="pose" src="assets/character/pose-welcome.png">
+    <img id="pose-d" class="pose" src="assets/character/pose-present-right.png">
+    <img id="pose-e" class="pose" src="assets/character/pose-think-chin.png">
+  </div>
+
+  <!-- Караоке-субтитры -->
+  <div id="cap-band" class="clip" data-start="0" data-duration="17.3" data-track-index="20"></div>
+
+</div>
+
+<script>
+(function () {
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+  const { fadeIn, slideUp, pop, drawPath, typewriter, counter, fillBar,
+          crossfade, buildCaptions, poseSwap } = createHFHelpers(tl);
+
+  /* ── S1: чеклист ── */
+  slideUp("#s1-chip", 0.15);
+  pop("#s1-card", 0.4);
+  slideUp("#s1-r1", 1.0);
+  slideUp("#s1-r2", 1.7);
+  slideUp("#s1-r3", 2.4);
+
+  /* ── переход S1 → S2 ── */
+  crossfade("#s1", "#s2", 3.9);
+
+  /* ── S2: терминал + стикер ── */
+  fadeIn("#s2-term", 4.1, 0.35);
+  typewriter("#s2-cmd", "pnpm add remotion", 4.4, 1.0);
+  fadeIn("#s2-out", 5.5, 0.3);
+  pop("#s2-sticker", 5.8);
+  fadeIn("#s2-tag", 6.2, 0.3);
+  drawPath("#s2-ann-path", 6.5, 0.7);
+
+  /* ── S2 → S3: бары + календарь + табы ── */
+  crossfade("#s2", "#s3", 7.9);
+  pop("#s3-bars", 8.1);
+  const BAR = [ ["#s3-r1","#s3-f1","#s3-p1",100,1.00,"var(--green)"],
+                ["#s3-r2","#s3-f2","#s3-p2", 38,0.38,"var(--orange)"],
+                ["#s3-r3","#s3-f3","#s3-p3",  6,0.06,"var(--red)"] ];
+  BAR.forEach((b, i) => {
+    slideUp(b[0], 8.5 + i*0.5);
+    fillBar(b[1], 8.7 + i*0.5, 0.7, b[4]);
+    counter(b[2], 0, b[3], 0.7, 8.7 + i*0.5, " %");
+  });
+  pop("#s3-cal", 10.4);
+  pop("#s3-tabs", 10.8);
+
+  /* ── S3 → S4: цветная глава ── */
+  tl.to("#s3", {opacity:0, duration:0.4, ease:"power1.in"}, 11.9);
+  fadeIn("#s4-bg", 12.0, 0.35);
+  pop("#s4-word", 12.4);
+
+  /* ── S4 → S5: CTA ── */
+  tl.to("#s4-bg", {opacity:0, duration:0.35, ease:"power1.in"}, 13.9);
+  tl.to("#s4-word", {opacity:0, duration:0.25, ease:"power1.in"}, 13.9);
+  /* ТЕМП ×2 — CTA без озвучки (правило в CLAUDE.md): биты вдвое ближе,
+     хвост после glow ≤2с. Это эталон для копирования в новые ролики. */
+  pop("#s5-card", 14.03);
+  slideUp("#s5-handle", 14.20);
+  fadeIn("#s5-desc", 14.35, 0.2);
+  pop("#s5-shot", 14.50);
+  pop("#s5-btn", 14.75);
+  tl.fromTo("#s5-cursor", {opacity:0, x:170, y:150},
+    {opacity:1, x:0, y:0, duration:0.35, ease:"power2.out", immediateRender:false}, 14.90);
+  tl.to("#s5-cursor", {scale:0.85, duration:0.08, ease:"power1.in"}, 15.30);
+  tl.to("#s5-btn",    {scale:0.93, duration:0.08, ease:"power1.in"}, 15.30);
+  tl.to("#s5-cursor", {scale:1, duration:0.11, ease:"back.out(2)"}, 15.38);
+  tl.to("#s5-btn",    {scale:1, duration:0.11, ease:"back.out(2)"}, 15.38);
+  tl.to("#s5-btn", {boxShadow:"0 0 60px rgba(38,165,228,0.8)", duration:0.18, yoyo:true, repeat:1}, 15.45);
+
+  /* ── персонаж: базовая → жест → welcome → present → think ── */
+  tl.set("#pose-a", {opacity:1}, 0);
+  poseSwap("#pose-a", "#pose-b", 2.3);
+  poseSwap("#pose-b", "#pose-c", 5.7);
+  poseSwap("#pose-c", "#pose-d", 8.2);
+  poseSwap("#pose-d", "#pose-e", 12.1);
+  poseSwap("#pose-e", "#pose-c", 14.2);
+
+  /* ── караоке: обычные, маркер, красное ── */
+  const CAP = [
+    {text:"для",      start:0.9, end:1.15},
+    {text:"монтажа",  start:1.15, end:1.7},
+    {text:"нужны",    start:1.75, end:2.2},
+    {text:"время",    start:2.3, end:2.9, hl:"mark"},
+    {text:"и",        start:3.4, end:3.5},
+    {text:"голова",   start:3.5, end:4.1},
+    {text:"это",      start:4.5, end:4.8},
+    {text:"не",       start:4.85, end:5.0, hl:"red"},
+    {text:"завод",    start:5.05, end:5.6, hl:"red"},
+    {text:"а",        start:6.0, end:6.1},
+    {text:"инструмент", start:6.15, end:7.0, hl:"mark"},
+    {text:"залетай",  start:14.6, end:15.1, hl:"mark"},
+    {text:"в",        start:15.15, end:15.25},
+    {text:"телегу",   start:15.3, end:15.8},
+  ];
+  buildCaptions(CAP, {
+    activeColor: "#16181D",
+    idleColor:   "#C7CBD1",
+    glow:        "0 0 0 rgba(0,0,0,0)",
+  });
+
+  window.__timelines["root"] = tl;
+})();
+</script>
+</body>
+</html>

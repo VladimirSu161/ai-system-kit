@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!-- ══════════════════════════════════════════════════════════════
+     ШАБЛОН НОВОГО ВИДЕО (dark-amber v2).
+     Как использовать:
+       1. Скопировать этот файл в корень проекта как index.html
+          (прошлое видео перед этим сохранить: past-videos/video-NN.html).
+       2. Транскрибировать inbox-файл, построить storyboard (CLAUDE.md).
+       3. Наполнить сцены по паттернам A–M из themes/dark-amber-reference.md §5.
+       4. Субтитры: node scripts/captions-from-transcript.mjs → captions.generated.js,
+          вычитать ошибки Whisper руками, вставить массив в CAP ниже.
+     Общий CSS и хелперы уже подключены — НЕ копировать их в файл.
+     Здесь остаются только сценоспецифичные стили и тайминги.
+     ══════════════════════════════════════════════════════════════ -->
+<html>
+<head>
+<meta charset="UTF-8">
+<!-- Шрифты локальные (@font-face в shared/dark-amber.css) — Google Fonts не подключать -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<!-- Ярус 2 = SVG-момент (≥1 на ролик, эталон blocks/svg-network.html).
+     Lottie НЕ подключать — движок не рендерит (см. CLAUDE.md).
+     Three (Ярус 3, ≤1 момент) — раскомментировать при использовании: -->
+<!-- <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script> -->
+<link rel="stylesheet" href="shared/dark-amber.css">
+<script src="shared/helpers.js"></script>
+<style>
+/* ТОЛЬКО сценоспецифичные стили этого видео (позиции canvas,
+   donut, lottie-контейнеров и т.п.). Общее — в shared/dark-amber.css. */
+</style>
+</head>
+<body>
+<div id="root" class="clip"
+     data-composition-id="root"
+     data-width="1080" data-height="1920"
+     data-start="0" data-duration="60">
+
+  <!-- Голос из inbox-файла: ffmpeg -i inbox/<файл> -vn inbox/audio.mp3 -->
+  <audio id="main-audio" class="clip"
+         data-start="0" data-duration="60" data-track-index="0"
+         src="inbox/audio.mp3" data-volume="1"></audio>
+
+  <!-- SFX: ТОЛЬКО whoosh (все переходы, volume 0.45) + counter (счётчики, 0.32).
+       Громкости пересмотрены 2026-08-02: SFX ВСЕГДА тише речи (пик на ~10 dB
+       ниже mean голоса). У каждого audio ОБЯЗАТЕЛЕН id, track-index 30+. Пример:
+  <audio id="sfx-30" class="clip" data-start="2.8" data-duration="0.45"
+         data-track-index="30" src="assets/audio/whoosh.mp3" data-volume="0.45"></audio>
+  -->
+
+  <!-- Ambient-подложка (ставить по умолчанию): свой синтезированный пад,
+       окно = весь ролик, data-duration = длине композиции -->
+  <audio id="amb-bed" class="clip" data-start="0" data-duration="60"
+         data-track-index="50" src="assets/audio/ambient-soft.mp3" data-volume="0.3"></audio>
+
+  <!-- ═══ S1: HOOK — паттерн A (big counter) или G (diagram),
+       геройский эффект: scramble на одном слове / 3D-фон ═══ -->
+  <div id="s1" class="scene clip" data-start="0" data-duration="4" data-track-index="1">
+    <div class="scene-inner" style="top:180px;">
+      <div id="s1-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-orange);box-shadow:0 0 12px var(--accent-orange);"></span>
+        ТЕГ-РУБРИКА
+      </div>
+      <div class="h1">
+        <span id="s1-l1" style="opacity:0; display:block;">ПЕРВАЯ СТРОКА</span>
+        <span id="s1-l2" style="opacity:0; display:block; color:var(--accent-orange); text-shadow:0 0 60px rgba(232,116,44,0.5);">АКЦЕНТ</span>
+      </div>
+    </div>
+    <div id="s1-rb" class="rb-chip rb-orange" style="opacity:0;">ЧИП</div>
+  </div>
+
+  <!-- ═══ S2…SN: сцены по storyboard (≥1 сцена / 6с, ≥4 entrance,
+       ≥1 непрерывное движение, ≥1 rb-chip в каждой) ═══ -->
+
+  <!-- ═══ S-CTA (финал): ВСЕГДА @ваш_канал · Telegram ═══ -->
+  <div id="s-cta" class="scene clip" data-start="50" data-duration="10" data-track-index="11">
+    <div class="scene-inner" style="top:280px;">
+      <div id="cta-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-orange);box-shadow:0 0 12px var(--accent-orange);"></span>
+        ТЕГ-РУБРИКА
+      </div>
+      <div id="cta-card" class="cta-card" style="opacity:0;">
+        <div style="display:flex; align-items:center; gap:28px;">
+          <div class="tg-squircle" id="cta-icon">
+            <svg width="56" height="56" viewBox="0 0 240 240" fill="none">
+              <path d="M120 0C53.7 0 0 53.7 0 120s53.7 120 120 120 120-53.7 120-120S186.3 0 120 0zm59.2 81.8l-20.2 95.2c-1.5 6.7-5.4 8.3-10.9 5.2l-30-22.1-14.5 13.9c-1.6 1.6-2.9 2.9-6 2.9l2.1-30.3 55.2-49.9c2.4-2.1-.5-3.3-3.7-1.2l-68.2 42.9-29.4-9.2c-6.4-2-6.5-6.4 1.3-9.5l114.8-44.3c5.3-2 10 1.3 9.5 6.4z" fill="#26A5E4"/>
+            </svg>
+          </div>
+          <div>
+            <div id="cta-handle" style="opacity:0; font-size:52px; font-weight:900; color:var(--accent-orange); line-height:1;">@ваш_канал · Telegram</div>
+            <div id="cta-desc" style="opacity:0; font-size:30px; color:var(--muted); margin-top:10px; font-family:'JetBrains Mono',monospace; letter-spacing:0.04em; text-transform:uppercase;">подпись про пользу канала</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="cta-rb" class="rb-chip rb-orange" style="opacity:0;">ЧИП</div>
+  </div>
+
+  <!-- Караоке-субтитры: окно = весь ролик -->
+  <div id="cap-band" class="clip" data-start="0" data-duration="60" data-track-index="20"></div>
+
+</div>
+
+<script>
+(function () {
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+  const { fadeIn, fadeOut, slideUp, pop, counter, fillBar, drawPath,
+          typewriter, scramble, mulberry32, kill,
+          crossfade, push, zoomPunch, wipe, wipeUp,
+          buildCaptions } = createHFHelpers(tl);
+
+  /* ── S1 ── */
+  fadeIn("#s1-pill", 0.1, 0.4);
+  slideUp("#s1-l1",  0.3);
+  fadeIn("#s1-l2",   0.7, 0.2);
+  fadeIn("#s1-rb",   1.9, 0.4);
+
+  /* ── S-CTA ── */
+  fadeIn("#cta-pill",   50.4, 0.35);
+  pop("#cta-card",      50.8);
+  slideUp("#cta-handle",51.4);
+  fadeIn("#cta-desc",   51.9, 0.35);
+  fadeIn("#cta-rb",     52.4, 0.35);
+  tl.to("#cta-card", {boxShadow:"0 0 60px rgba(232,116,44,0.35)", duration:1.2, yoyo:true, repeat:3}, 51.5);
+
+  /* ── Переходы: минимум 4 из 5 типов, окна сцен перекрыты на D ──
+     zoomPunch("#s1", "#s2", 3.6);  и т.д. */
+
+  /* ── Караоке-субтитры: вставить массив из captions.generated.js
+     (после ручной вычитки ошибок Whisper!) ── */
+  const CAP = [];
+  if (CAP.length) buildCaptions(CAP);
+
+  window.__timelines["root"] = tl;
+})();
+</script>
+</body>
+</html>

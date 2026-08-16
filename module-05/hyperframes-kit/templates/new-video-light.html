@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!-- ══════════════════════════════════════════════════════════════
+     ШАБЛОН НОВОГО ВИДЕО — тема STICKER LIGHT (светлая версия каждого
+     ролика; с 2026-08-03 обе темы собираются по умолчанию).
+     Как использовать:
+       1. Заготовку из этого шаблона в слот кладёт scripts/queue-add.sh
+          (composition-light.html); в корень руками не копировать.
+       2. Storyboard по themes/sticker-light-reference.md
+          (зоны кадра + UI-зоны площадок, банк поз, паттерны P1–P11).
+       3. Субтитры: queue/video-NN/captions.js → вычитать → CAP сюда;
+          выделения hl:"mark"/"red" расставить руками (§4 референса).
+       4. Позы: assets/character/pose-*.png; смены — poseSwap на смысловых битах.
+     Общий CSS/JS подключён — НЕ копировать в файл.
+     ══════════════════════════════════════════════════════════════ -->
+<html>
+<head>
+<meta charset="UTF-8">
+<!-- Шрифты локальные (@font-face в shared/sticker-light.css) -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="shared/sticker-light.css">
+<script src="shared/helpers.js"></script>
+<style>
+/* ТОЛЬКО сценоспецифичные стили этого видео. Общее — в shared/sticker-light.css. */
+</style>
+</head>
+<body>
+<div id="root" class="clip"
+     data-composition-id="root"
+     data-width="1080" data-height="1920"
+     data-start="0" data-duration="60">
+
+  <!-- Голос из inbox-файла -->
+  <audio id="main-audio" class="clip"
+         data-start="0" data-duration="60" data-track-index="0"
+         src="inbox/audio.mp3" data-volume="1"></audio>
+
+  <!-- SFX: ТОЛЬКО whoosh (смена блока инфозоны, 0.45) + counter (0.32).
+       Громкости пересмотрены 2026-08-02: SFX ВСЕГДА тише речи (пик на ~10 dB
+       ниже mean голоса). На позы, карточки и стикеры звук НЕ вешать. -->
+
+  <!-- Ambient-подложка (ставить по умолчанию): свой синтезированный пад,
+       окно = весь ролик, data-duration = длине композиции -->
+  <audio id="amb-bed" class="clip" data-start="0" data-duration="60"
+         data-track-index="50" src="assets/audio/ambient-soft.mp3" data-volume="0.3"></audio>
+
+  <!-- Перспективный пол — статичный, первым в #root -->
+  <div class="floor-grid"></div>
+
+  <!-- UI-скрим: затемнение низа и правого края под белые иконки/подпись
+       площадок (TikTok/Reels/Shorts). Статичный, НЕ удалять. -->
+  <div class="ui-scrim"></div>
+
+  <!-- ═══ B1: первый блок инфозоны (пример P1: тема + чек-лист) ═══ -->
+  <div id="b1" class="scene clip" data-start="0" data-duration="6" data-track-index="1">
+    <div class="info-zone">
+      <div id="b1-chip" class="topic-chip" style="opacity:0;">Тема</div>
+      <div id="b1-card" class="ios-card" style="opacity:0; width:700px;">
+        <div class="ios-card-head">
+          <div class="ico-squircle">🎬</div>
+          <div>
+            <div class="ios-card-title">Заголовок</div>
+            <div class="ios-card-sub">подпись</div>
+          </div>
+        </div>
+        <div id="b1-r1" class="check-row" style="opacity:0;"><span class="check-ico" style="background:var(--blue);">⏱</span> пункт один</div>
+        <div id="b1-r2" class="check-row" style="opacity:0;"><span class="check-ico" style="background:var(--orange);">⚡</span> пункт два</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ B2…BN: блоки по storyboard (паттерны P1–P6 из референса §5) ═══ -->
+
+  <!-- ═══ B-CTA (финал): паттерн P7, ВСЕГДА @ваш_канал · Telegram ═══ -->
+  <div id="b-cta" class="scene clip" data-start="50" data-duration="10" data-track-index="9">
+    <div class="info-zone">
+      <div id="cta-card" class="cta-card-light" style="opacity:0; width:760px;">
+        <div style="display:flex; align-items:center; gap:28px;">
+          <div class="tg-squircle-light" id="cta-icon">
+            <svg width="54" height="54" viewBox="0 0 240 240" fill="none">
+              <path d="M120 0C53.7 0 0 53.7 0 120s53.7 120 120 120 120-53.7 120-120S186.3 0 120 0zm59.2 81.8l-20.2 95.2c-1.5 6.7-5.4 8.3-10.9 5.2l-30-22.1-14.5 13.9c-1.6 1.6-2.9 2.9-6 2.9l2.1-30.3 55.2-49.9c2.4-2.1-.5-3.3-3.7-1.2l-68.2 42.9-29.4-9.2c-6.4-2-6.5-6.4 1.3-9.5l114.8-44.3c5.3-2 10 1.3 9.5 6.4z" fill="#26A5E4"/>
+            </svg>
+          </div>
+          <div>
+            <div id="cta-handle" style="opacity:0; font-size:50px; font-weight:900; color:var(--ink); line-height:1;">@ваш_канал · Telegram</div>
+            <div id="cta-desc" style="opacity:0; font-size:28px; color:var(--muted); margin-top:12px;">подпись про пользу канала</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Персонаж: банк поз, живёт весь ролик ═══ -->
+  <div id="char" class="char-zone clip" data-start="0" data-duration="60" data-track-index="15">
+    <img id="pose-base"          class="pose" src="assets/character/pose-base.png">
+    <img id="pose-wave"          class="pose" src="assets/character/pose-wave.png">
+    <!-- ⛔ pose-five — БРАК генерации (лишняя третья рука), НЕ ставить в ролик.
+         Нужна поднятая ладонь → pose-wave. Подробно: CLAUDE.md / sticker-light-reference.md -->
+    <img id="pose-five"          class="pose" src="assets/character/pose-five.png">
+    <img id="pose-fists"         class="pose" src="assets/character/pose-fists.png">
+    <img id="pose-think-chin"    class="pose" src="assets/character/pose-think-chin.png">
+    <img id="pose-think-cross"   class="pose" src="assets/character/pose-think-cross.png">
+    <img id="pose-stop"          class="pose" src="assets/character/pose-stop.png">
+    <img id="pose-present-left"  class="pose" src="assets/character/pose-present-left.png">
+    <img id="pose-present-right" class="pose" src="assets/character/pose-present-right.png">
+    <img id="pose-shrug"         class="pose" src="assets/character/pose-shrug.png">
+    <img id="pose-welcome"       class="pose" src="assets/character/pose-welcome.png">
+  </div>
+
+  <!-- Караоке-субтитры: окно = весь ролик -->
+  <div id="cap-band" class="clip" data-start="0" data-duration="60" data-track-index="20"></div>
+
+</div>
+
+<script>
+(function () {
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+  const { fadeIn, fadeOut, slideUp, pop, counter, fillBar, drawPath,
+          typewriter, mulberry32, kill, crossfade,
+          buildCaptions, poseSwap, breathe, wobble } = createHFHelpers(tl);
+
+  /* Персонаж «дышит» весь ролик (второе число = длительность ролика).
+     Стикеры оживлять wobble("#id", start, dur) на время их окна. */
+  breathe("#char", 0, 60);
+
+  /* ── B1 ── */
+  slideUp("#b1-chip", 0.15);
+  pop("#b1-card", 0.4);
+  slideUp("#b1-r1", 1.1);
+  slideUp("#b1-r2", 1.8);
+
+  /* ── Смена блоков инфозоны: ТОЛЬКО crossfade (не push/wipe — §5) ──
+     crossfade("#b1", "#b2", 5.6);  // окна блоков перекрывать на D! */
+
+  /* ── B-CTA ── */
+  pop("#cta-card", 50.5);
+  slideUp("#cta-handle", 51.1);
+  fadeIn("#cta-desc", 51.5, 0.35);
+
+  /* ── Персонаж: стартовая поза + смены на смысловых битах (§3) ── */
+  tl.set("#pose-wave", {opacity:1}, 0);
+  /* poseSwap("#pose-wave", "#pose-base", 2.4);
+     poseSwap("#pose-base", "#pose-think-chin", 6.8);
+     …финал: poseSwap("#pose-…", "#pose-welcome", 50.2); */
+
+  /* ── Караоке: массив из captions.generated.js после вычитки;
+     hl:"mark" (жёлтый маркер) / hl:"red" — расставить руками ── */
+  const CAP = [];
+  if (CAP.length) buildCaptions(CAP, {
+    activeColor: "#16181D",
+    idleColor:   "#C7CBD1",
+    glow:        "0 0 0 rgba(0,0,0,0)",
+  });
+
+  window.__timelines["root"] = tl;
+})();
+</script>
+</body>
+</html>

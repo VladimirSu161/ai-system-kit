@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080">
+  <title>FX Particle Converge</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: #050505;
+    }
+    #root {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      background: #050505;
+      overflow: hidden;
+    }
+    #pcanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1080px;
+      height: 1920px;
+    }
+  </style>
+</head>
+<body>
+  <div
+    id="root"
+    data-composition-id="fx-particle-converge"
+    data-width="1080"
+    data-height="1920"
+    data-start="0"
+    data-duration="3"
+  >
+    <canvas id="pcanvas" width="1080" height="1920"></canvas>
+  </div>
+
+  <script>
+  (function () {
+    /* ── mulberry32 детерминированный PRNG ── */
+    function mulberry32(seed) {
+      return function () {
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    /* ── параметры ── */
+    var WORD       = 'AI';
+    var W          = 1080;
+    var H          = 1920;
+    var FONT_SIZE  = 520;       // крупно — чтобы getImageData точно давал пиксели
+    var TARGET_PTS = 600;       // целевых точек
+    var PARTICLE_R = 3.2;       // радиус частицы
+    var CONVERGE_T = 1.8;       // секунд на схождение
+    var HOLD_T     = 1.2;       // держим после
+    var SEED       = 42;
+
+    /* ── палитра dark-amber ── */
+    var COLORS = [
+      '#F5B544', '#E8742C', '#F5B544',
+      '#E8742C', '#F5C96A', '#FFAD42',
+      '#5B8BFF', '#3DD68C',            // редкие синий/зелёный
+      '#F5B544', '#E8742C', '#F5B544',
+      '#F5B544', '#E8742C', '#F5B544',
+    ];
+
+    /* ── Шаг 1: offscreen-рендер слова ── */
+    var off = document.createElement('canvas');
+    var OW = W, OH = H;
+    off.width  = OW;
+    off.height = OH;
+    var octx = off.getContext('2d');
+    octx.fillStyle = '#000000';
+    octx.fillRect(0, 0, OW, OH);
+    octx.fillStyle = '#ffffff';
+    octx.font = 'bold ' + FONT_SIZE + 'px sans-serif';
+    octx.textAlign    = 'center';
+    octx.textBaseline = 'middle';
+    octx.fillText(WORD, OW / 2, OH / 2);
+
+    /* ── Шаг 2: читаем пиксели, собираем целевые точки ── */
+    var imgData = octx.getImageData(0, 0, OW, OH);
+    var data    = imgData.data;
+    var all_pts = [];
+    var step    = 4; // прореживаем каждые N пикселей
+    for (var y = 0; y < OH; y += step) {
+      for (var x = 0; x < OW; x += step) {
+        var idx = (y * OW + x) * 4;
+        if (data[idx + 3] > 128 && data[idx] > 128) {
+          all_pts.push({ x: x, y: y });
+        }
+      }
+    }
+
+    /* fallback — если прореживание дало мало точек, убираем step */
+    if (all_pts.length < 100) {
+      all_pts = [];
+      for (var y2 = 0; y2 < OH; y2++) {
+        for (var x2 = 0; x2 < OW; x2++) {
+          var idx2 = (y2 * OW + x2) * 4;
+          if (data[idx2 + 3] > 128 && data[idx2] > 128) {
+            all_pts.push({ x: x2, y: y2 });
+          }
+        }
+      }
+    }
+
+    /* ── Прореживаем до TARGET_PTS равномерно ── */
+    var rng      = mulberry32(SEED);
+    var targets  = [];
+    if (all_pts.length <= TARGET_PTS) {
+      targets = all_pts.slice();
+    } else {
+      // равномерная выборка с детерминированным rng
+      var shuffled = all_pts.slice();
+      for (var i = shuffled.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
+      }
+      targets = shuffled.slice(0, TARGET_PTS);
+    }
+
+    var N = targets.length;
+
+    /* ── Шаг 3: стартовые позиции у краёв кадра ── */
+    var particles = [];
+    var rng2 = mulberry32(SEED + 1);
+    for (var k = 0; k < N; k++) {
+      var edge = Math.floor(rng2() * 4); // 0=top,1=right,2=bottom,3=left
+      var sx, sy;
+      switch (edge) {
+        case 0: sx = rng2() * W;      sy = -30;      break;
+        case 1: sx = W + 30;          sy = rng2() * H; break;
+        case 2: sx = rng2() * W;      sy = H + 30;   break;
+        default: sx = -30;            sy = rng2() * H; break;
+      }
+      var colorIdx = Math.floor(rng2() * COLORS.length);
+      particles.push({
+        sx: sx, sy: sy,
+        tx: targets[k].x,
+        ty: targets[k].y,
+        color: COLORS[colorIdx],
+        stagger: rng2() * 0.35   // 0..0.35 — лёгкий стаггер
+      });
+    }
+
+    /* ── Easing — easeOutCubic ── */
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    /* ── Видимый canvas ── */
+    var canvas = document.getElementById('pcanvas');
+    var ctx    = canvas.getContext('2d');
+
+    /* ── Состояние анимации ── */
+    var state = { p: 0 };
+
+    /* ── Отрисовка кадра ── */
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#050505';
+      ctx.fillRect(0, 0, W, H);
+
+      /* слабый радиальный vignette (dark-amber стиль) */
+      var grad = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, W*0.7);
+      grad.addColorStop(0,   'rgba(255,255,255,0.025)');
+      grad.addColorStop(1,   'transparent');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      var globalP = state.p; // 0..1
+
+      for (var i = 0; i < N; i++) {
+        var pt = particles[i];
+        // stagger: частица стартует позже
+        var localP = Math.max(0, (globalP - pt.stagger) / (1 - pt.stagger));
+        if (localP > 1) localP = 1;
+        var ep = easeOutCubic(localP);
+
+        var cx = pt.sx + (pt.tx - pt.sx) * ep;
+        var cy = pt.sy + (pt.ty - pt.sy) * ep;
+
+        // альфа: появляется быстро, полная прозрачность у цели
+        var alpha = Math.min(1, localP * 4);
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle   = pt.color;
+        ctx.beginPath();
+        ctx.arc(cx, cy, PARTICLE_R, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    /* ── GSAP timeline ── */
+    window.__timelines = window.__timelines || {};
+
+    var tl = gsap.timeline({ paused: true });
+
+    // фаза 1: частицы летят к слову (0 → CONVERGE_T)
+    tl.to(state, {
+      p: 1,
+      duration: CONVERGE_T,
+      ease: 'none',          // ease встроен в draw() через easeOutCubic
+      onUpdate: draw
+    });
+
+    // фаза 2: держим (просто держим кадр — ещё один tween ни на что)
+    tl.to(state, {
+      p: 1,
+      duration: HOLD_T,
+      ease: 'none',
+      onUpdate: draw
+    });
+
+    window.__timelines['fx-particle-converge'] = tl;
+
+    /* первый кадр — пустой фон */
+    draw();
+
+  })();
+  </script>
+</body>
+</html>

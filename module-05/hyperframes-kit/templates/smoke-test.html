@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!-- ══════════════════════════════════════════════════════════════
+     СМОУК-ТЕСТ: проверка, что рендер-пайплайн жив.
+     Запуск: scripts/smoke-test.sh [версия]  (см. скрипт)
+     Проверяет: shared/dark-amber.css (+локальные шрифты), shared/helpers.js
+     (entrance, counter, scramble, fillBar, crossfade, караоке), рендер MP4.
+     НЕ редактировать под конкретное видео — это вечный эталон.
+     ══════════════════════════════════════════════════════════════ -->
+<html>
+<head>
+<meta charset="UTF-8">
+<!-- Шрифты локальные (@font-face в shared/dark-amber.css) -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="shared/dark-amber.css">
+<script src="shared/helpers.js"></script>
+</head>
+<body>
+<div id="root" class="clip"
+     data-composition-id="root"
+     data-width="1080" data-height="1920"
+     data-start="0" data-duration="4">
+
+  <div id="s1" class="scene clip" data-start="0" data-duration="2.5" data-track-index="1">
+    <div class="scene-inner" style="top:180px;">
+      <div id="s1-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-orange);box-shadow:0 0 12px var(--accent-orange);"></span>
+        SMOKE TEST
+      </div>
+      <div id="s1-h" class="h1" style="opacity:0; color:var(--accent-orange);">ТЕСТ</div>
+      <div id="s1-num" class="hero-num" style="opacity:0; color:var(--accent-amber); font-size:200px;">0</div>
+    </div>
+    <div id="s1-rb" class="rb-chip rb-orange" style="opacity:0;">CHIP</div>
+  </div>
+
+  <div id="s2" class="scene clip" data-start="2.0" data-duration="2.0" data-track-index="2">
+    <div class="scene-inner centered" style="top:300px;">
+      <div id="s2-h" class="h2 rainbow">ПЕРЕХОД ОК</div>
+      <div class="bar-row" style="margin-top:40px; width:700px;">
+        <div class="bar-track"><div id="s2-bar" class="bar-fill" style="background:var(--accent-green);"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cap-band" class="clip" data-start="0" data-duration="4" data-track-index="20"></div>
+</div>
+
+<script>
+(function () {
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+  const { fadeIn, slideUp, pop, counter, fillBar, scramble,
+          crossfade, buildCaptions } = createHFHelpers(tl);
+
+  fadeIn("#s1-pill", 0.1, 0.3);
+  slideUp("#s1-h",   0.3);
+  scramble("#s1-h", "ТЕСТ", 0.3, 0.8);
+  pop("#s1-num",     0.6);
+  counter("#s1-num", 0, 1234, 1.2, 0.7);
+  fadeIn("#s1-rb",   0.9, 0.3);
+
+  fillBar("#s2-bar", 2.4, 1.0, 0.85);
+
+  crossfade("#s1", "#s2", 2.0);
+
+  buildCaptions([
+    {text:"проверка", start:0.3, end:0.9},
+    {text:"караоке",  start:0.9, end:1.5},
+    {text:"работает.",start:1.5, end:2.2},
+    {text:"и",        start:2.6, end:2.8},
+    {text:"шаред",    start:2.8, end:3.3},
+    {text:"тоже.",    start:3.3, end:3.8}
+  ]);
+
+  window.__timelines["root"] = tl;
+})();
+</script>
+</body>
+</html>

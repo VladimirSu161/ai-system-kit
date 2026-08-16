@@ -1,0 +1,91 @@
+<!doctype html>
+<!--
+  БЛОК-ШАБЛОН: BG Grid 3D  (Ярус 3 словаря движения)
+  ===================================================
+  Две wireframe-сетки, уходящие в перспективу «в пол», скользят по Z
+  (эффект бесконечной ленты) с лёгким волновым наклоном. Прозрачный фон —
+  ложится ПОЗАДИ текста в тёмной композиции. Тема dark-amber.
+
+  ⚠ КАК ПОДКЛЮЧАТЬ (важно — иначе пустой рендер):
+  Это НЕ под-композиция через data-composition-src. Компилятор HyperFrames
+  склеивает inline-скрипты в один бандл, и ESM `import` его ломает. Поэтому
+  3D встраивается ИНЛАЙН прямо в композицию:
+    1. Скопируй <canvas id="three-layer"> в #root (z-index ниже текста).
+    2. Скопируй CSS #three-layer в <style> композиции.
+    3. Подключи глобальный THREE классическим тегом в <head>:
+       <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+    4. Скопируй классический <script> ниже в композицию.
+  Несколько 3D-слоёв на странице — используй разные id канваса.
+
+  КОНТРАКТ: всё движение — функция от time (секунды) из события hf-seek;
+  без Math.random/Date.now/requestAnimationFrame.
+-->
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1080, height=1920" />
+  <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 1080px; height: 1920px; overflow: hidden; background: transparent; }
+    #three-layer { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  </style>
+</head>
+<body>
+<canvas id="three-layer"></canvas>
+<script>
+(function () {
+  const canvas = document.getElementById("three-layer");
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(1080, 1920, false);
+  renderer.setPixelRatio(1);
+
+  const scene = new THREE.Scene();
+  // Камера наклонена вниз — сетка уходит «в пол» перспективно
+  const camera = new THREE.PerspectiveCamera(45, 1080 / 1920, 0.1, 200);
+  camera.position.set(0, 3.5, 7);
+  camera.lookAt(0, -1, 0);
+
+  // Ближняя сетка — амбер
+  const planeGeo = new THREE.PlaneGeometry(14, 20, 24, 36);
+  planeGeo.rotateX(-Math.PI / 2);
+  planeGeo.translate(0, -1.5, -2);
+  const gridLines = new THREE.LineSegments(
+    new THREE.WireframeGeometry(planeGeo),
+    new THREE.LineBasicMaterial({ color: 0xF5B544, transparent: true, opacity: 0.35,
+      blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  scene.add(gridLines);
+
+  // Дальняя сетка — оранж, добавляет глубину
+  const planeGeo2 = new THREE.PlaneGeometry(20, 28, 16, 24);
+  planeGeo2.rotateX(-Math.PI / 2);
+  planeGeo2.translate(0, -3, -6);
+  const gridLines2 = new THREE.LineSegments(
+    new THREE.WireframeGeometry(planeGeo2),
+    new THREE.LineBasicMaterial({ color: 0xE8742C, transparent: true, opacity: 0.18,
+      blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  scene.add(gridLines2);
+
+  const Z_PERIOD = 1.5;   // период «ячейки» по Z для зацикливания
+  const DRIFT = 0.3;      // скорость движения вглубь, единиц/сек
+
+  function renderAt(time) {
+    const t = time;
+    gridLines.position.z  = (t * DRIFT) % Z_PERIOD;
+    gridLines.rotation.x  = Math.sin(t * 0.15) * 0.03;          // волновой pitch
+    gridLines2.position.z = ((t * DRIFT * 0.7) % Z_PERIOD) + 0.5;
+    gridLines2.rotation.x = Math.sin(t * 0.12 + 1.2) * 0.025;
+    camera.position.x = Math.sin(t * 0.06) * 0.4;               // покачивание камеры
+    camera.position.y = 3.5 + Math.cos(t * 0.04) * 0.15;
+    camera.lookAt(0, -1, 0);
+    renderer.render(scene, camera);
+  }
+
+  window.addEventListener("hf-seek", (e) => renderAt(e.detail.time));
+  renderAt(window.__hfThreeTime || 0);  // стартовый кадр
+})();
+</script>
+</body>
+</html>

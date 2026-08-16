@@ -1,0 +1,187 @@
+<!doctype html><html lang="ru"><head><meta charset="UTF-8"/>
+<meta name="viewport" content="width=1080, height=1920"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+  :root{--bg:#050505;--text:#F5F5F5;--muted:#8A8A8A;--accent-amber:#F5B544;--accent-orange:#E8742C;--accent-blue:#5B8BFF;--accent-green:#3DD68C;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:var(--bg);
+            font-family:"Inter",system-ui,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+  #root{position:relative;width:1080px;height:1920px;overflow:hidden}
+  .clip{position:absolute}
+
+  #donut-wrap{
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:700px;
+    text-align:center;
+  }
+  #donut-title{
+    font-size:40px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin-bottom:12px;
+  }
+  #donut-subtitle{
+    font-size:24px;
+    font-weight:400;
+    color:var(--muted);
+    letter-spacing:0.05em;
+    margin-bottom:64px;
+  }
+  #donut-svg-wrap{
+    position:relative;
+    width:500px;
+    height:500px;
+    margin:0 auto;
+  }
+  #donut-svg{
+    width:500px;
+    height:500px;
+  }
+  #donut-center{
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    pointer-events:none;
+  }
+  #donut-pct{
+    font-size:96px;
+    font-weight:800;
+    color:var(--accent-amber);
+    line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  #donut-pct-sign{
+    font-size:52px;
+    font-weight:700;
+    color:var(--accent-amber);
+  }
+  #donut-desc{
+    font-size:24px;
+    font-weight:500;
+    color:var(--muted);
+    margin-top:8px;
+    letter-spacing:0.05em;
+  }
+  #donut-legend{
+    margin-top:48px;
+    display:flex;
+    justify-content:center;
+    gap:40px;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:22px;
+    font-weight:500;
+    color:var(--muted);
+  }
+  .legend-dot{
+    width:14px;height:14px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+</style></head><body>
+<div id="root" data-composition-id="chart-donut" data-width="1080" data-height="1920" data-start="0" data-duration="2.5">
+
+  <div id="donut-wrap" class="clip"
+       data-start="0" data-duration="2.5" data-track-index="0">
+
+    <div id="donut-title">ВНЕДРЕНИЕ ИИ В КОМПАНИЯХ</div>
+    <div id="donut-subtitle">Доля успешных внедрений</div>
+
+    <div id="donut-svg-wrap">
+      <!-- r=180 → длина окружности = 2π×180 ≈ 1130.97 -->
+      <svg id="donut-svg" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Фон-кольцо -->
+        <circle
+          cx="250" cy="250" r="180"
+          stroke="rgba(255,255,255,0.07)"
+          stroke-width="52"
+          fill="none"
+        />
+        <!-- Прогресс-дуга (начало сверху — rotate -90) -->
+        <circle
+          id="donut-arc"
+          cx="250" cy="250" r="180"
+          stroke="#F5B544"
+          stroke-width="52"
+          fill="none"
+          stroke-linecap="round"
+          stroke-dasharray="1130.97"
+          stroke-dashoffset="1130.97"
+          transform="rotate(-90 250 250)"
+        />
+      </svg>
+
+      <div id="donut-center">
+        <div id="donut-pct">0<span id="donut-pct-sign">%</span></div>
+        <div id="donut-desc">успех</div>
+      </div>
+    </div>
+
+    <div id="donut-legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#F5B544"></div>
+        Успешно внедрили
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:rgba(255,255,255,0.12)"></div>
+        Не завершили
+      </div>
+    </div>
+
+  </div>
+
+</div>
+<script>
+  window.__timelines = window.__timelines || {};
+
+  const TARGET_PCT = 73;
+  const CIRCUMFERENCE = 2 * Math.PI * 180; // ≈ 1130.97
+
+  const arc    = document.getElementById("donut-arc");
+  const pctEl  = document.getElementById("donut-pct");
+  const signEl = document.getElementById("donut-pct-sign");
+
+  const proxy = { v: 0 };
+
+  const tl = gsap.timeline({ paused: true });
+
+  // Заголовок
+  tl.from("#donut-title",    { opacity: 0, y: -20, duration: 0.4, ease: "power2.out" }, 0);
+  tl.from("#donut-subtitle", { opacity: 0, y: -12, duration: 0.3, ease: "power2.out" }, 0.12);
+
+  // SVG появляется как целое
+  tl.from("#donut-svg-wrap", { opacity: 0, scale: 0.88, duration: 0.45, ease: "back.out(1.4)", transformOrigin:"50% 50%" }, 0.25);
+
+  // Дуга заполняется + счётчик
+  tl.to(proxy, {
+    v: TARGET_PCT,
+    duration: 1.4,
+    ease: "power2.inOut",
+    onUpdate: function() {
+      const pct = proxy.v;
+      // dashoffset: от CIRCUMFERENCE (0%) до CIRCUMFERENCE*(1 - pct/100) (pct%)
+      const offset = CIRCUMFERENCE * (1 - pct / 100);
+      arc.setAttribute("stroke-dashoffset", offset.toFixed(3));
+      // Счётчик (без знака %)
+      pctEl.textContent = Math.round(pct);
+      // Добавляем знак обратно после числа
+      pctEl.appendChild(signEl);
+    }
+  }, 0.55);
+
+  // Легенда
+  tl.from(".legend-item", {
+    opacity: 0,
+    y: 16,
+    duration: 0.35,
+    stagger: 0.1,
+    ease: "power2.out"
+  }, 1.6);
+
+  window.__timelines["chart-donut"] = tl;
+</script></body></html>

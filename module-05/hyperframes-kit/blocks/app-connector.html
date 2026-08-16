@@ -1,0 +1,190 @@
+<!doctype html>
+<!--
+  БЛОК: App Connector
+  ==================
+  Две иконки приложений, соединённые светящейся дугой.
+  Как на скрине: Claude → NotebookLM.
+
+  ИСПОЛЬЗОВАНИЕ В STORYBOARD:
+  "Покажи коннектор Claude → Notion"
+  "Кадр с иконками ChatGPT и n8n соединёнными линией"
+  "App connector: Make слева, Airtable справа, подпись AUTOMATION ENGINE"
+
+  ПАРАМЕТРЫ (менять вручную при создании кадра):
+    --app-left-bg       цвет фона левой карточки
+    --app-left-color    цвет иконки/текста левой карточки
+    --app-right-bg      цвет фона правой карточки
+    --app-right-color   цвет иконки/текста правой карточки
+    --connector-color   цвет линии-коннектора (дефолт: белый/золотой)
+
+  Иконки: ../icons/{name}.svg
+  Manifest цветов: ../icons/manifest.json
+-->
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1080, height=1920" />
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 1080px; height: 1920px;
+      overflow: hidden;
+      background: #0a0a0a;
+      font-family: "Inter", system-ui, sans-serif;
+      color: #fafafa;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #root {
+      position: relative;
+      width: 1080px; height: 1920px;
+      background: radial-gradient(ellipse 900px 700px at 50% 50%, rgba(255,255,255,0.04), transparent 70%), #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ---- Враппер двух карточек ---- */
+    .connector-scene {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      position: relative;
+      width: 900px;
+    }
+
+    /* ---- Карточка приложения ---- */
+    .app-card {
+      width: 310px; height: 310px;
+      border-radius: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      position: relative;
+      z-index: 2;
+      /* тень для глубины */
+      box-shadow: 0 8px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+
+    .app-card.left  { background: var(--app-left-bg, #CC5500); }
+    .app-card.right { background: var(--app-right-bg, #1a2a4a); }
+
+    .app-card svg, .app-card img {
+      width: 110px; height: 110px;
+      object-fit: contain;
+    }
+
+    /* SVG иконки — перекрасить в нужный цвет */
+    .app-card.left  svg { fill: var(--app-left-color, #fff); }
+    .app-card.right svg { fill: var(--app-right-color, #fff); }
+
+    .app-name {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: #fff;
+    }
+    .app-role {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-top: -12px;
+    }
+
+    /* ---- Коннектор (SVG дуга между карточками) ---- */
+    .connector-svg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 340px; height: 120px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Орбита-точка (свечение на дуге) */
+    .orbit-dot {
+      r: 10;
+      fill: var(--connector-color, #f5c97a);
+      filter: url(#glow);
+    }
+  </style>
+</head>
+<body>
+<div id="root">
+  <div class="connector-scene clip" data-start="0" data-duration="4" data-track-index="0">
+
+    <!-- Левая карточка: ЗАМЕНИ иконку и цвета через CSS-переменные -->
+    <div class="app-card left" style="--app-left-bg: #CC5500; --app-left-color: #fff;">
+      <!-- Вставь SVG иконку сюда: assets/icons/claude.svg -->
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <!-- claude icon path -->
+        <path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-1.021-.046-.327.023-.234.1-.2.2-.132.3-.045.34.045.34.132.3.2.2.234.1.327.023.899-.025 1.418-.05zm14.584-7.91l-4.72 2.648-.08.23.08.128.23.048.79.048 2.698.073 2.339.097 1.021.046.327-.023.234-.1.2-.2.132-.3.045-.34-.045-.34-.132-.3-.2-.2-.234-.1-.327-.023-.899.025-1.418.05zM8.076 20.315l2.647-4.72-.128-.229-.23.008-.192.12-.614.485-1.64 1.326-1.46 1.17-.624.537-.19.27-.067.35.068.35.19.27.27.19.35.068.35-.068.27-.19.19-.27.196-.337.624-.54zm7.848-16.63L13.277 8.4l.128.23.23-.008.192-.12.614-.485 1.64-1.326 1.46-1.17.624-.537.19-.27.067-.35-.068-.35-.19-.27-.27-.19-.35-.068-.35.068-.27.19-.19.27-.196.337-.624.54zM2.52 8.345l4.72 2.647.23-.08.048-.23-.048-.192-.485-.614-1.326-1.64-1.17-1.46-.537-.624-.27-.19-.35-.067-.35.068-.27.19-.19.27-.068.35.068.35.19.27.27.19.337.196.54.624zm18.96 7.31l-4.72-2.647-.23.08-.048.23.048.192.485.614 1.326 1.64 1.17 1.46.537.624.27.19.35.067.35-.068.27-.19.19-.27.068-.35-.068-.35-.19-.27-.27-.19-.337-.196-.54-.624zM8.076 3.685l2.647 4.72.23.08.128-.128v-.23l-.048-.79-.073-2.698-.097-2.339-.046-1.021-.023-.327-.1-.234-.2-.2-.3-.132-.34-.045-.34.045-.3.132-.2.2-.1.234-.023.327.025.899.05 1.418zm7.848 16.63l-2.647-4.72-.23-.08-.128.128v.23l.048.79.073 2.698.097 2.339.046 1.021.023.327.1.234.2.2.3.132.34.045.34-.045.3-.132.2-.2.1-.234.023-.327-.025-.899-.05-1.418z"/>
+      </svg>
+      <div class="app-name">Claude</div>
+      <div class="app-role">Reasoning Engine</div>
+    </div>
+
+    <!-- Линия-коннектор между карточками -->
+    <svg class="connector-svg" viewBox="0 0 340 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.1)"/>
+          <stop offset="50%" stop-color="rgba(245,201,122,0.9)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0.1)"/>
+        </linearGradient>
+      </defs>
+      <!-- Дуга -->
+      <path id="arcPath" d="M 20 60 Q 170 0 320 60" stroke="url(#lineGrad)" stroke-width="2.5" fill="none" opacity="0.7"/>
+      <!-- Орбитальная точка (анимируется по дуге в GSAP) -->
+      <circle id="orbitDot" class="orbit-dot" cx="20" cy="60" r="10"/>
+    </svg>
+
+    <!-- Правая карточка: ЗАМЕНИ иконку и цвета -->
+    <div class="app-card right" style="--app-right-bg: #1a2a4a; --app-right-color: #fff;">
+      <!-- Вставь SVG иконку: assets/icons/notion.svg, n8n.svg и т.д. -->
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <!-- google gemini / notebooklm placeholder — замени на нужную иконку -->
+        <path d="M12 0C8.688 0 6 2.688 6 6s2.688 6 6 6 6-2.688 6-6-2.688-6-6-6zm0 10.5c-2.484 0-4.5-2.016-4.5-4.5S9.516 1.5 12 1.5s4.5 2.016 4.5 4.5-2.016 4.5-4.5 4.5zM0 24c0-6.627 5.373-12 12-12s12 5.373 12 12H0z"/>
+      </svg>
+      <div class="app-name">NotebookLM</div>
+      <div class="app-role">Memory Vault</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  window.__timelines = window.__timelines || {};
+
+  const tl = gsap.timeline({ paused: true });
+
+  // Появление левой карточки
+  tl.from(".app-card.left", { opacity: 0, x: -60, scale: 0.85, duration: 0.6, ease: "back.out(1.4)" })
+  // Появление правой карточки
+    .from(".app-card.right", { opacity: 0, x: 60, scale: 0.85, duration: 0.6, ease: "back.out(1.4)" }, "-=0.3")
+  // Дуга появляется
+    .from(".connector-svg path", { opacity: 0, strokeDasharray: 400, strokeDashoffset: 400, duration: 0.7, ease: "power2.out" }, "-=0.2")
+  // Орбитальная точка едет по дуге
+    .to("#orbitDot", {
+      duration: 1.2,
+      ease: "power1.inOut",
+      motionPath: { path: "#arcPath", align: "#arcPath", autoRotate: false, start: 0, end: 1 }
+    }, "-=0.3")
+  // Пульс точки
+    .to("#orbitDot", { r: 14, opacity: 0.6, duration: 0.3, yoyo: true, repeat: 1 });
+
+  window.__timelines["app-connector"] = tl;
+</script>
+</body>
+</html>

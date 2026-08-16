@@ -1,0 +1,39 @@
+# Рендеры и медиа — не версионируем (тяжёлые, восстанавливаются рендером)
+renders/*
+!renders/.gitkeep
+output/
+*.mp4
+*.mov
+*.wav
+*.m4a
+*.mp3
+# …но банк звуков темы — часть комплекта, его версионируем
+!assets/audio/*.mp3
+
+# Служебные кэши студии
+.thumbnails/
+.waveform-cache/
+snapshots/
+
+# Системное
+.DS_Store
+node_modules/
+
+# Временные файлы пайплайна (пересоздаются для каждого видео)
+transcript.json
+inbox/audio.mp3
+captions.generated.js
+__smoke-test.html
+
+# Слоты очереди и исходники (временные)
+queue/*
+!queue/.gitkeep
+inbox/_raw/*
+!inbox/_raw/.gitkeep
+inbox/_done/*
+!inbox/_done/.gitkeep
+
+# Сырые стикеры до срезки фона (готовые лежат в assets/stickers/)
+inbox/stickers/*
+!inbox/stickers/.gitkeep
+.render.lock/

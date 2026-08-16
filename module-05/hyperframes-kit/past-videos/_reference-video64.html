@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+<script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+<style>
+.clip { position: absolute; }
+
+:root {
+  --bg: #050505;
+  --bg-grid: rgba(255,255,255,0.05);
+  --text: #F5F5F5;
+  --muted: #8A8A8A;
+  --faint: #4A4A4A;
+  --accent-orange: #E8742C;
+  --accent-blue:   #5B8BFF;
+  --accent-amber:  #F5B544;
+  --accent-green:  #3DD68C;
+  --accent-pink:   #FF6B9D;
+  --card-bg:   rgba(255,255,255,0.03);
+  --card-border: rgba(255,255,255,0.08);
+  --card-radius: 22px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; }
+
+body {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 42%, rgba(255,255,255,0.045) 0%, transparent 65%),
+    repeating-linear-gradient(0deg,  var(--bg-grid) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(90deg, var(--bg-grid) 0 1px, transparent 1px 64px),
+    var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+#root { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+
+.scene { top: 0; left: 0; width: 1080px; height: 1920px; }
+
+.scene-inner {
+  position: absolute;
+  top: 200px; left: 0;
+  width: 1080px; height: 1020px;
+  display: flex; flex-direction: column;
+  align-items: flex-start;
+  padding: 0 72px;
+  gap: 0;
+}
+.scene-inner.centered { align-items: center; text-align: center; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 14px 28px; border-radius: 100px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.14);
+  font: 500 26px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.4);
+  margin-bottom: 44px;
+}
+.pill-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.h1  { font-size: 116px; font-weight: 900; line-height: 0.98; letter-spacing: -0.02em; }
+.h2  { font-size: 88px;  font-weight: 900; line-height: 1.02; letter-spacing: -0.02em; }
+.h3  { font-size: 64px;  font-weight: 800; line-height: 1.08; letter-spacing: -0.01em; }
+.hero-num { font-size: 320px; font-weight: 900; line-height: 1; letter-spacing: -0.04em;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 120px currentColor; }
+.body-text { font-size: 40px; font-weight: 400; line-height: 1.45; color: var(--muted); }
+.mono-label { font: 500 28px/1.2 "JetBrains Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+
+.card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--card-radius); padding: 34px 40px;
+  display: flex; align-items: center; gap: 28px; width: 100%;
+  margin-bottom: 18px;
+}
+.card-icon { font-size: 52px; line-height: 1; flex-shrink: 0; width: 88px; text-align: center; }
+.card-title { font-size: 44px; font-weight: 800; line-height: 1.15; color: var(--text); }
+.card-sub   { font-size: 24px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.08em;
+              text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+
+.fill-bar-track {
+  width: 100%; height: 14px; border-radius: 100px;
+  background: rgba(255,255,255,0.06); overflow: hidden; margin-top: 12px;
+}
+.fill-bar-fill {
+  height: 100%; border-radius: 100px;
+  transform-origin: left center; transform: scaleX(0);
+}
+
+.caret {
+  display: inline-block; width: 3px; height: 0.85em;
+  background: currentColor; margin-left: 4px;
+  vertical-align: text-bottom;
+  animation: blink 0.7s steps(2) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.conn-svg path {
+  fill: none; stroke: currentColor; stroke-width: 4; stroke-linecap: round;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+/* right-bottom chip zone x>540, y>1248 */
+.rb-chip {
+  position: absolute; top: 1310px; left: 570px; width: 460px;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 100px; padding: 18px 36px;
+  font-size: 28px; font-weight: 700; letter-spacing: 0.08em;
+  color: var(--muted); text-transform: uppercase;
+}
+.rb-orange { background: rgba(232,116,44,0.10); border-color: rgba(232,116,44,0.30); color: var(--accent-orange); }
+.rb-blue   { background: rgba(91,139,255,0.10);  border-color: rgba(91,139,255,0.30);  color: var(--accent-blue);   }
+.rb-amber  { background: rgba(245,181,68,0.10);  border-color: rgba(245,181,68,0.30);  color: var(--accent-amber);  }
+.rb-green  { background: rgba(61,214,140,0.10);  border-color: rgba(61,214,140,0.30);  color: var(--accent-green);  }
+.rb-pink   { background: rgba(255,107,157,0.10); border-color: rgba(255,107,157,0.30); color: var(--accent-pink);   }
+
+/* CTA card */
+.cta-card {
+  background: rgba(255,255,255,0.03);
+  border: 2px solid rgba(232,116,44,0.4);
+  border-radius: 28px; padding: 52px 48px; width: 100%;
+}
+.tg-squircle {
+  width: 100px; height: 100px; border-radius: 24px;
+  background: rgba(38,165,228,0.15); border: 1px solid rgba(38,165,228,0.3);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+/* S1 3D canvas */
+#s1-canvas {
+  position: absolute; top: 0; left: 0;
+  width: 1080px; height: 1920px; pointer-events: none; z-index: 0;
+}
+
+/* S3 SVG flow nodes */
+.flow-node {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px; padding: 22px 30px;
+  font: 700 32px/1 "JetBrains Mono", monospace; text-transform: uppercase;
+  display: flex; align-items: center; gap: 16px;
+}
+
+/* S4 context rows */
+.ctx-row { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-bottom: 22px; }
+.ctx-label { font: 600 30px/1 "JetBrains Mono", monospace; color: var(--muted); text-transform: uppercase; }
+
+/* S7 two-col */
+.two-col { display: flex; gap: 20px; width: 100%; }
+.col-block { flex: 1; border-radius: 22px; padding: 36px 32px; display: flex; flex-direction: column; gap: 16px; }
+.col-count { font-size: 96px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+.col-unit  { font: 500 24px/1 "JetBrains Mono", monospace; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* S4 cell-grid (паттерн H) */
+.cellgrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; width: 800px; }
+.gcell { aspect-ratio: 1/1; border-radius: 10px; background: rgba(255,255,255,0.035);
+         border: 1px solid rgba(255,255,255,0.06); position: relative; }
+.gcell-glow { position: absolute; inset: 5px; border-radius: 7px; opacity: 0; filter: blur(1px); }
+
+/* S7 donut (паттерн M) */
+#s7-donut { position: absolute; top: 1296px; left: 600px; width: 200px; height: 200px; opacity: 0; }
+.donut-track { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 16; }
+.donut-fill  { fill: none; stroke: var(--accent-green); stroke-width: 16; stroke-linecap: round;
+               filter: drop-shadow(0 0 8px var(--accent-green)); transform: rotate(-90deg); transform-origin: 100px 100px; }
+
+/* S10 lottie */
+#s10-lottie { position: absolute; top: 300px; left: 0; width: 1080px; height: 600px; }
+
+/* ─── КАРАОКЕ-СУБТИТРЫ (полоса над зоной аватара, y 1080–1250) ─── */
+#cap-band {
+  position: absolute; left: 0; top: 1080px;
+  width: 1080px; height: 170px; z-index: 60;
+  pointer-events: none;
+}
+.cap-group {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; gap: 16px; align-items: center;
+  padding: 18px 40px; border-radius: 20px;
+  background: rgba(8,8,8,0.78);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  white-space: nowrap; opacity: 0;
+}
+.cap-word {
+  font: 800 48px/1 "Inter", system-ui, sans-serif;
+  letter-spacing: -0.01em; color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div id="root" class="clip"
+     data-composition-id="root"
+     data-width="1080" data-height="1920"
+     data-start="0" data-duration="63">
+
+  <audio id="main-audio" class="clip"
+         data-start="0" data-duration="63" data-track-index="0"
+         src="inbox/audio.mp3" data-volume="1"></audio>
+
+  <!-- ══════ SFX-СЛОЙ (синтез ffmpeg, track-index 30+) ══════ -->
+  <!-- переходы -->
+  <audio id="sfx-30" class="clip" data-start="2.8" data-duration="0.4" data-track-index="30" src="assets/audio/punch.mp3" data-volume="0.8"></audio>
+  <audio id="sfx-31" class="clip" data-start="6.4" data-duration="0.45" data-track-index="31" src="assets/audio/whoosh.mp3" data-volume="0.7"></audio>
+  <audio id="sfx-32" class="clip" data-start="13.0" data-duration="0.45" data-track-index="32" src="assets/audio/whoosh.mp3" data-volume="0.55"></audio>
+  <audio id="sfx-33" class="clip" data-start="19.7" data-duration="0.45" data-track-index="33" src="assets/audio/whoosh.mp3" data-volume="0.7"></audio>
+  <audio id="sfx-34" class="clip" data-start="23.6" data-duration="0.45" data-track-index="34" src="assets/audio/whoosh.mp3" data-volume="0.7"></audio>
+  <audio id="sfx-35" class="clip" data-start="32.2" data-duration="0.45" data-track-index="35" src="assets/audio/whoosh.mp3" data-volume="0.55"></audio>
+  <audio id="sfx-36" class="clip" data-start="37.5" data-duration="0.45" data-track-index="36" src="assets/audio/whoosh.mp3" data-volume="0.7"></audio>
+  <audio id="sfx-37" class="clip" data-start="43.0" data-duration="0.45" data-track-index="37" src="assets/audio/whoosh.mp3" data-volume="0.55"></audio>
+  <audio id="sfx-38" class="clip" data-start="50.5" data-duration="0.5" data-track-index="38" src="assets/audio/riseup.mp3" data-volume="0.7"></audio>
+  <audio id="sfx-39" class="clip" data-start="52.5" data-duration="0.5" data-track-index="39" src="assets/audio/riseup.mp3" data-volume="0.7"></audio>
+  <!-- счётчики -->
+  <audio id="sfx-40" class="clip" data-start="3.5" data-duration="1.0" data-track-index="40" src="assets/audio/counter.mp3" data-volume="0.5"></audio>
+  <audio id="sfx-41" class="clip" data-start="33.2" data-duration="1.4" data-track-index="41" src="assets/audio/counter.mp3" data-volume="0.5"></audio>
+  <!-- кульминация: «контекстная инженерия» -->
+  <audio id="sfx-52" class="clip" data-start="51.0" data-duration="0.9" data-track-index="52" src="assets/audio/ding.mp3" data-volume="0.7"></audio>
+
+  <!-- ══════════════════════════════════════════════════════
+       S1 (0–3.2s): HOOK — Лимиты Claude Code? + 3D частицы
+  ══════════════════════════════════════════════════════ -->
+  <div id="s1" class="scene clip" data-start="0" data-duration="3.3" data-track-index="1">
+    <canvas id="s1-canvas"></canvas>
+    <div class="scene-inner" style="top:180px;">
+      <div id="s1-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-orange);box-shadow:0 0 12px var(--accent-orange);"></span>
+        CLAUDE CODE
+      </div>
+      <div class="h1" style="margin-bottom:28px;">
+        <span id="s1-l1" style="opacity:0; display:block;">УПИРАЕШЬСЯ В</span>
+        <span id="s1-l2" style="opacity:0; display:block; color:var(--accent-orange); text-shadow:0 0 60px rgba(232,116,44,0.5);">ЛИМИТЫ?</span>
+      </div>
+      <div id="s1-sub" class="body-text" style="opacity:0; max-width:860px;">
+        слушай внимательно — есть решение.
+      </div>
+    </div>
+    <div id="s1-rb" class="rb-chip rb-orange" style="opacity:0;">⚡ ТОКЕНЫ</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S2 (3.2–6.8s): 3 СПОСОБА — big counter
+  ══════════════════════════════════════════════════════ -->
+  <div id="s2" class="scene clip" data-start="2.8" data-duration="4.1" data-track-index="2">
+    <div class="scene-inner centered" style="top:250px; align-items:center;">
+      <div id="s2-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-amber);box-shadow:0 0 12px var(--accent-amber);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s2-num" class="hero-num" style="opacity:0; color:var(--accent-amber); font-variant-numeric:tabular-nums;">0</div>
+      <div id="s2-label" class="h3" style="opacity:0; color:var(--text); margin-top:32px; text-align:center;">ПРОСТЫХ СПОСОБА</div>
+      <div id="s2-sub" class="body-text" style="opacity:0; margin-top:24px; text-align:center;">
+        получить больше использования
+      </div>
+    </div>
+    <div id="s2-rb" class="rb-chip rb-amber" style="opacity:0;">БЕЗ ЗАДРАТ</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S3 (6.8–13.4s): СПОСОБ 1 — как агент работает + SVG flow
+  ══════════════════════════════════════════════════════ -->
+  <div id="s3" class="scene clip" data-start="6.4" data-duration="7.1" data-track-index="3">
+    <div class="scene-inner" style="top:160px;">
+      <div id="s3-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-blue);box-shadow:0 0 12px var(--accent-blue);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s3-eyebrow" class="mono-label" style="opacity:0; color:var(--accent-blue); margin-bottom:20px;">СПОСОБ 1</div>
+      <div id="s3-headline" class="h2" style="opacity:0; margin-bottom:52px;">
+        КАК АГЕНТ<br>РЕАЛЬНО<br>РАБОТАЕТ
+      </div>
+
+      <!-- SVG connector diagram: USER → ИСТОРИЯ → CLAUDE API -->
+      <div style="position:relative; width:936px; height:340px;">
+        <!-- Nodes -->
+        <div id="s3-node-user" class="flow-node" style="opacity:0; position:absolute; left:0; top:120px; color:var(--text);">
+          💬 ТВОЁ СООБЩЕНИЕ
+        </div>
+        <div id="s3-node-hist" class="flow-node" style="opacity:0; position:absolute; left:220px; top:10px; color:var(--accent-blue); border-color:rgba(91,139,255,0.35);">
+          📜 ВСЯ ИСТОРИЯ
+        </div>
+        <div id="s3-node-api" class="flow-node" style="opacity:0; position:absolute; left:560px; top:120px; color:var(--accent-orange); border-color:rgba(232,116,44,0.35);">
+          🤖 CLAUDE API
+        </div>
+
+        <!-- SVG arrows -->
+        <svg style="position:absolute;top:0;left:0;width:936px;height:340px; color:var(--accent-blue);" class="conn-svg">
+          <path id="s3-line1" d="M 280 155 Q 340 100 300 55"/>
+          <path id="s3-line2" d="M 450 60 Q 580 80 620 130"/>
+        </svg>
+      </div>
+    </div>
+    <div id="s3-rb" class="rb-chip rb-blue" style="opacity:0;">КАЖДЫЙ РАЗ</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S4 (13.4–20.1s): КОНТЕКСТ РАСТЁТ — fillBars
+  ══════════════════════════════════════════════════════ -->
+  <div id="s4" class="scene clip" data-start="13.0" data-duration="7.2" data-track-index="4">
+    <div class="scene-inner" style="top:160px;">
+      <div id="s4-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-blue);box-shadow:0 0 12px var(--accent-blue);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s4-headline" class="h2" style="opacity:0; margin-bottom:36px;">
+        С КАЖДЫМ<br>СООБЩЕНИЕМ<br>КОНТЕКСТ РАСТЁТ
+      </div>
+
+      <!-- counter токенов + cell-grid (паттерн H) -->
+      <div id="s4-counter-wrap" style="opacity:0; display:flex; align-items:baseline; gap:18px; margin-bottom:28px;">
+        <span class="mono-label" style="color:var(--muted);">КОНТЕКСТ ·</span>
+        <span id="s4-tokens" style="font:900 56px/1 'JetBrains Mono',monospace; color:var(--accent-orange); font-variant-numeric:tabular-nums;">0</span>
+        <span class="mono-label" style="color:var(--muted);">ТОКЕНОВ</span>
+      </div>
+      <div id="s4-grid" class="cellgrid" style="opacity:0;"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S5 (20.1–24.0s): /compact — typewriter
+  ══════════════════════════════════════════════════════ -->
+  <div id="s5" class="scene clip" data-start="19.7" data-duration="4.4" data-track-index="5">
+    <div class="scene-inner centered" style="top:300px; align-items:center;">
+      <div id="s5-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-green);box-shadow:0 0 12px var(--accent-green);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s5-label" class="mono-label" style="opacity:0; color:var(--muted); margin-bottom:32px;">КАК СНИЗИТЬ ЭФФЕКТ?</div>
+      <div id="s5-cmd" style="opacity:0; font: 700 86px/1 'JetBrains Mono', monospace; color:var(--accent-green); text-shadow:0 0 40px var(--accent-green); margin-bottom:20px;">
+        <span id="s5-typed"></span><span class="caret" style="color:var(--accent-green);"></span>
+      </div>
+      <div id="s5-or" class="mono-label" style="opacity:0; margin-top:12px; margin-bottom:12px;">— ИЛИ —</div>
+      <div id="s5-newsess" class="h3" style="opacity:0; color:var(--muted);">НОВАЯ СЕССИЯ</div>
+    </div>
+    <div id="s5-rb" class="rb-chip rb-green" style="opacity:0;">СБРОС КОНТЕКСТА</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S6 (24.0–32.6s): СПОСОБ 2 — переиспользуемые скрипты
+  ══════════════════════════════════════════════════════ -->
+  <div id="s6" class="scene clip" data-start="23.6" data-duration="9.1" data-track-index="6">
+    <div class="scene-inner" style="top:160px;">
+      <div id="s6-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-amber);box-shadow:0 0 12px var(--accent-amber);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s6-eyebrow" class="mono-label" style="opacity:0; color:var(--accent-amber); margin-bottom:20px;">СПОСОБ 2</div>
+      <div id="s6-headline" class="h2" style="opacity:0; margin-bottom:48px;">
+        ПЕРЕИСПОЛЬЗУЕМЫЕ<br>СКРИПТЫ
+      </div>
+
+      <div id="s6-card1" class="card" style="opacity:0; border-color:rgba(91,139,255,0.25);">
+        <div class="card-icon">📄</div>
+        <div>
+          <div class="card-title">СКРИПТЫ</div>
+          <div class="card-sub">повторяющиеся операции</div>
+        </div>
+      </div>
+      <div id="s6-card2" class="card" style="opacity:0; border-color:rgba(245,181,68,0.25);">
+        <div class="card-icon">🔧</div>
+        <div>
+          <div class="card-title">ИНСТРУМЕНТЫ</div>
+          <div class="card-sub">готовые команды</div>
+        </div>
+      </div>
+      <div id="s6-card3" class="card" style="opacity:0; border-color:rgba(61,214,140,0.35); box-shadow:0 0 28px rgba(61,214,140,0.12);">
+        <div class="card-icon">⚡</div>
+        <div>
+          <div class="card-title" style="color:var(--accent-green);">СКИЛЫ</div>
+          <div class="card-sub">best practice в коде</div>
+        </div>
+      </div>
+    </div>
+    <div id="s6-rb" class="rb-chip rb-amber" style="opacity:0;">БЕЗ ДУБЛЕЙ</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S7 (32.6–37.9s): ТОКЕНЫ В ПУСТУЮ — two-column
+  ══════════════════════════════════════════════════════ -->
+  <div id="s7" class="scene clip" data-start="32.2" data-duration="5.8" data-track-index="7">
+    <div class="scene-inner" style="top:160px;">
+      <div id="s7-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-amber);box-shadow:0 0 12px var(--accent-amber);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s7-headline" class="h2" style="opacity:0; margin-bottom:52px;">
+        КАЖДЫЙ РАЗ<br>= ТОКЕНЫ<br><span style="color:var(--accent-orange);">В ПУСТУЮ</span>
+      </div>
+      <div id="s7-cols" class="two-col" style="opacity:0; width:936px;">
+        <div class="col-block" style="background:rgba(232,116,44,0.05); border:1px solid rgba(232,116,44,0.25);">
+          <div class="card-sub" style="color:var(--accent-orange);">БЕЗ СКИЛОВ</div>
+          <div id="s7-cnt-left" class="col-count" style="color:var(--accent-orange);">0</div>
+          <div class="col-unit">токенов</div>
+          <div class="fill-bar-track">
+            <div id="s7-bar-left" class="fill-bar-fill" style="background:var(--accent-orange);"></div>
+          </div>
+        </div>
+        <div class="col-block" style="background:rgba(61,214,140,0.05); border:1px solid rgba(61,214,140,0.25);">
+          <div class="card-sub" style="color:var(--accent-green);">СО СКИЛАМИ</div>
+          <div id="s7-cnt-right" class="col-count" style="color:var(--accent-green);">0</div>
+          <div class="col-unit">токенов</div>
+          <div class="fill-bar-track">
+            <div id="s7-bar-right" class="fill-bar-fill" style="background:var(--accent-green);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <svg id="s7-donut" viewBox="0 0 200 200">
+      <circle class="donut-track" cx="100" cy="100" r="84"></circle>
+      <circle id="s7-donut-fill" class="donut-fill" cx="100" cy="100" r="84"></circle>
+      <text id="s7-donut-pct" x="100" y="94" text-anchor="middle" fill="#3DD68C"
+            style="font:900 52px Inter, sans-serif; font-variant-numeric:tabular-nums;">0%</text>
+      <text x="100" y="128" text-anchor="middle" fill="#8A8A8A"
+            style="font:600 19px 'JetBrains Mono', monospace; letter-spacing:0.1em;">ЭКОНОМИЯ</text>
+    </svg>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S8 (37.9–43.4s): СПОСОБ 3 — не только OPUS
+  ══════════════════════════════════════════════════════ -->
+  <div id="s8" class="scene clip" data-start="37.5" data-duration="6.0" data-track-index="8">
+    <div class="scene-inner centered" style="top:250px; align-items:center;">
+      <div id="s8-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-green);box-shadow:0 0 12px var(--accent-green);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s8-eyebrow" class="mono-label" style="opacity:0; color:var(--accent-green); margin-bottom:36px;">СПОСОБ 3</div>
+      <!-- OPUS letters individually animated -->
+      <div style="display:flex; gap:0; margin-bottom:20px;">
+        <span id="s8-o" style="opacity:0; font-size:200px; font-weight:900; line-height:1; color:var(--accent-orange); letter-spacing:-0.04em; text-shadow:0 0 80px var(--accent-orange);">O</span>
+        <span id="s8-p" style="opacity:0; font-size:200px; font-weight:900; line-height:1; color:var(--accent-orange); letter-spacing:-0.04em; text-shadow:0 0 80px var(--accent-orange);">P</span>
+        <span id="s8-u" style="opacity:0; font-size:200px; font-weight:900; line-height:1; color:var(--accent-orange); letter-spacing:-0.04em; text-shadow:0 0 80px var(--accent-orange);">U</span>
+        <span id="s8-s" style="opacity:0; font-size:200px; font-weight:900; line-height:1; color:var(--accent-orange); letter-spacing:-0.04em; text-shadow:0 0 80px var(--accent-orange);">S</span>
+      </div>
+      <div id="s8-sub" class="h3" style="opacity:0; color:var(--muted);">≠ ВСЕГДА</div>
+      <div id="s8-hint" class="body-text" style="opacity:0; margin-top:28px;">
+        контролируй модель в каждом скиле
+      </div>
+    </div>
+    <div id="s8-rb" class="rb-chip rb-green" style="opacity:0;">ВЫБИРАЙ SAM</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S9 (43.4–50.9s): SONNET + HAIKU — модели дешевле
+  ══════════════════════════════════════════════════════ -->
+  <div id="s9" class="scene clip" data-start="43.0" data-duration="8.0" data-track-index="9">
+    <div class="scene-inner" style="top:160px;">
+      <div id="s9-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-blue);box-shadow:0 0 12px var(--accent-blue);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s9-headline" class="h2" style="opacity:0; margin-bottom:48px;">
+        ДЛЯ БОЛЬШИНСТВА<br>ЗАДАЧ ХВАТАЕТ:
+      </div>
+
+      <div id="s9-card1" class="card" style="opacity:0; border-color:rgba(91,139,255,0.35); box-shadow:0 0 36px rgba(91,139,255,0.1);">
+        <div class="card-icon" style="font-size:48px;">🧠</div>
+        <div style="flex:1;">
+          <div class="card-title" style="color:var(--accent-blue);">SONNET 4.6</div>
+          <div class="card-sub">код, ресёрч, сложные задачи</div>
+        </div>
+        <div style="font:700 28px/1 'JetBrains Mono',monospace; color:var(--accent-blue);">~10× дешевле</div>
+      </div>
+
+      <div id="s9-card2" class="card" style="opacity:0; border-color:rgba(255,107,157,0.35); box-shadow:0 0 36px rgba(255,107,157,0.1);">
+        <div class="card-icon" style="font-size:48px;">⚡</div>
+        <div style="flex:1;">
+          <div class="card-title" style="color:var(--accent-pink);">HAIKU 4.5</div>
+          <div class="card-sub">быстро, дёшево, рутина</div>
+        </div>
+        <div style="font:700 28px/1 'JetBrains Mono',monospace; color:var(--accent-pink);">~50× дешевле</div>
+      </div>
+
+      <div id="s9-footer" class="body-text" style="opacity:0; margin-top:24px;">
+        и обе <span style="color:var(--accent-green); font-weight:700;">меньше потребляют лимиты</span>
+      </div>
+    </div>
+    <div id="s9-rb" class="rb-chip rb-blue" style="opacity:0;">МЕНЬШЕ ЛИМИТОВ</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S10 (50.9–52.9s): КОНТЕКСТНАЯ ИНЖЕНЕРИЯ + Lottie sparkles
+  ══════════════════════════════════════════════════════ -->
+  <div id="s10" class="scene clip" data-start="50.5" data-duration="2.5" data-track-index="10">
+    <div id="s10-lottie" style="opacity:0;"></div>
+    <div class="scene-inner centered" style="top:400px; align-items:center;">
+      <div id="s10-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-amber);box-shadow:0 0 12px var(--accent-amber);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s10-term" class="h2" style="opacity:0; text-align:center; background:linear-gradient(90deg, var(--accent-orange), var(--accent-amber), var(--accent-green), var(--accent-blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1.1;">
+        КОНТЕКСТНАЯ<br>ИНЖЕНЕРИЯ
+      </div>
+      <div id="s10-sub" class="body-text" style="opacity:0; margin-top:28px; text-align:center;">
+        именно так это называется.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       S11 (52.9–62.7s): CTA — @ваш_канал · Telegram
+  ══════════════════════════════════════════════════════ -->
+  <div id="s11" class="scene clip" data-start="52.5" data-duration="10.2" data-track-index="11">
+    <div class="scene-inner" style="top:280px;">
+      <div id="s11-pill" class="pill" style="opacity:0;">
+        <span class="pill-dot" style="background:var(--accent-orange);box-shadow:0 0 12px var(--accent-orange);"></span>
+        CLAUDE CODE
+      </div>
+      <div id="s11-pre" class="body-text" style="opacity:0; margin-bottom:36px;">
+        в закреплённом сообщении собираю
+      </div>
+      <div id="s11-cta" class="cta-card" style="opacity:0;">
+        <div style="display:flex; align-items:center; gap:28px; margin-bottom:28px;">
+          <div class="tg-squircle" id="s11-icon">
+            <svg width="56" height="56" viewBox="0 0 240 240" fill="none">
+              <path d="M120 0C53.7 0 0 53.7 0 120s53.7 120 120 120 120-53.7 120-120S186.3 0 120 0zm59.2 81.8l-20.2 95.2c-1.5 6.7-5.4 8.3-10.9 5.2l-30-22.1-14.5 13.9c-1.6 1.6-2.9 2.9-6 2.9l2.1-30.3 55.2-49.9c2.4-2.1-.5-3.3-3.7-1.2l-68.2 42.9-29.4-9.2c-6.4-2-6.5-6.4 1.3-9.5l114.8-44.3c5.3-2 10 1.3 9.5 6.4z" fill="#26A5E4"/>
+            </svg>
+          </div>
+          <div>
+            <div id="s11-handle" style="opacity:0; font-size:52px; font-weight:900; color:var(--accent-orange); line-height:1;">@ваш_канал · Telegram</div>
+            <div id="s11-desc" style="opacity:0; font-size:30px; color:var(--muted); margin-top:10px; font-family:'JetBrains Mono',monospace; letter-spacing:0.04em; text-transform:uppercase;">база знаний по нейросетям</div>
+          </div>
+        </div>
+        <div id="s11-typed-wrap" style="opacity:0;">
+          <div style="font-size:36px; color:var(--muted); line-height:1.4;">
+            <span id="s11-typed"></span><span class="caret" style="color:var(--accent-orange);"></span>
+          </div>
+        </div>
+      </div>
+      <div id="s11-link" class="mono-label" style="opacity:0; margin-top:32px; color:var(--muted);">
+        ссылка в шапке профиля ↑
+      </div>
+    </div>
+    <div id="s11-rb" class="rb-chip rb-orange" style="opacity:0;">ЗАБИРАЙ БЕСПЛАТНО</div>
+  </div>
+
+  <!-- ── КАРАОКЕ-СУБТИТРЫ (поверх всех сцен, окно = весь ролик) ── -->
+  <div id="cap-band" class="clip" data-start="0" data-duration="63" data-track-index="20"></div>
+
+</div>
+
+<script>
+(function () {
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+
+  const fadeIn  = (id, at, dur)   => tl.fromTo(id, {opacity:0}, {opacity:1, duration:dur||0.35, ease:"power2.out"}, at);
+  const slideUp = (id, at, delay) => tl.fromTo(id, {opacity:0,y:32}, {opacity:1,y:0, duration:0.45, ease:"power3.out"}, at+(delay||0));
+  const pop     = (id, at, delay) => tl.fromTo(id, {opacity:0,scale:0.7}, {opacity:1,scale:1, duration:0.5, ease:"back.out(1.6)"}, at+(delay||0));
+
+  const counter = (id, from, to, dur, at, suffix) => {
+    const el = document.querySelector(id);
+    const o = {n: from};
+    tl.to(o, {
+      n: to, duration: dur, ease:"power2.out",
+      onUpdate: () => el.textContent = Math.round(o.n).toLocaleString("ru-RU").replace(/,/g," ") + (suffix||"")
+    }, at);
+  };
+
+  const fillBar = (id, at, dur, toScale) =>
+    tl.to(id, {scaleX: toScale==null?1:toScale, duration:dur, ease:"power2.out"}, at);
+
+  const drawPath = (id, at, dur) => {
+    const p = document.querySelector(id);
+    const len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+    tl.to(p, {strokeDashoffset:0, duration:dur, ease:"power2.inOut"}, at);
+  };
+
+  const typewriter = (id, text, at, dur) => {
+    const el = document.querySelector(id);
+    const o = {i:0};
+    tl.to(o, {
+      i: text.length, duration:dur, ease:"none",
+      onUpdate: () => el.textContent = text.slice(0, Math.round(o.i))
+    }, at);
+  };
+
+  /* ── Детерминированный ГПСЧ (для scramble) ── */
+  function mulberry32(s){return function(){s|=0;s=(s+0x6D2B79F5)|0;let t=Math.imul(s^(s>>>15),1|s);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
+
+  /* ── scramble: текст «расшифровывается» из случайных символов ── */
+  const scramble = (id, finalText, at, dur) => {
+    const el = document.querySelector(id);
+    const CHARSET = "АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789#@%&";
+    const LEN = finalText.length, FRAMES = 60;
+    const rng = mulberry32(7), matrix = [];
+    for (let f=0; f<FRAMES; f++){ const row=[]; for(let i=0;i<LEN;i++) row.push(CHARSET[Math.floor(rng()*CHARSET.length)]); matrix.push(row); }
+    const o = {p:0};
+    tl.to(o, {p:1, duration:dur, ease:"none", onUpdate:function(){
+      const p=o.p, fi=Math.min(FRAMES-1, Math.floor(p*FRAMES));
+      let r="";
+      for(let i=0;i<LEN;i++){ const th=(i/LEN)*0.7; r += (p>=th+0.3) ? finalText[i] : (finalText[i]===" "?" ":matrix[fi][i]); }
+      el.textContent = r;
+    }}, at);
+    tl.call(()=>{ el.textContent = finalText; }, [], at+dur);
+  };
+
+  /* ════ ПАЛИТРА ПЕРЕХОДОВ (окна сцен перекрыты на D) ════
+     crossfade — продолжение мысли · push — следующий шаг ·
+     zoomPunch — акцент/число · wipe — контраст · wipeUp — к выводу */
+  /* hard-kill: после ухода сцены сбросить transform и спрятать —
+     иначе уехавшая за край сцена ловится инспектором как overflow */
+  const kill = (outId, at) =>
+    tl.set(outId, {visibility:"hidden", opacity:0, xPercent:0, scale:1, y:0, clipPath:"none"}, at);
+
+  const crossfade = (outId, inId, outAt, D) => {
+    D = D || 0.5;
+    tl.to(outId, {opacity:0, scale:1.08, duration:D, ease:"power2.in"}, outAt);
+    tl.fromTo(inId, {opacity:0, scale:0.94}, {opacity:1, scale:1, duration:D, ease:"power2.out", immediateRender:false}, outAt);
+    kill(outId, outAt + D);
+  };
+  const push = (outId, inId, outAt, D) => {
+    D = D || 0.55;
+    tl.to(outId, {xPercent:-100, opacity:0.3, duration:D, ease:"power2.inOut"}, outAt);
+    tl.fromTo(inId, {xPercent:100, opacity:0.6}, {xPercent:0, opacity:1, duration:D, ease:"power2.inOut", immediateRender:false}, outAt);
+    kill(outId, outAt + D);
+  };
+  const zoomPunch = (outId, inId, outAt, D) => {
+    D = D || 0.5;
+    tl.to(outId, {scale:1.25, opacity:0, duration:D, ease:"power2.in"}, outAt);
+    tl.fromTo(inId, {scale:0.55, opacity:0}, {scale:1, opacity:1, duration:D, ease:"back.out(1.4)", immediateRender:false}, outAt);
+    kill(outId, outAt + D);
+  };
+  const wipe = (outId, inId, outAt, D) => {
+    D = D || 0.6;
+    tl.to(outId, {opacity:0, duration:D, ease:"power1.in"}, outAt + D*0.4);
+    tl.fromTo(inId, {clipPath:"inset(0 0 0 100%)"}, {clipPath:"inset(0 0 0 0%)", duration:D, ease:"power3.inOut", immediateRender:false}, outAt);
+    kill(outId, outAt + D);
+  };
+  const wipeUp = (outId, inId, outAt, D) => {
+    D = D || 0.6;
+    tl.to(outId, {opacity:0, y:-40, duration:D, ease:"power1.in"}, outAt + D*0.35);
+    tl.fromTo(inId, {clipPath:"inset(100% 0 0 0)"}, {clipPath:"inset(0% 0 0 0)", duration:D, ease:"power3.inOut", immediateRender:false}, outAt);
+    kill(outId, outAt + D);
+  };
+
+  /* ── S1: hook + scramble ── */
+  fadeIn("#s1-pill", 0.1, 0.4);
+  slideUp("#s1-l1",  0.3);
+  fadeIn("#s1-l2",   0.7, 0.2);
+  scramble("#s1-l2", "ЛИМИТЫ?", 0.7, 1.2);
+  slideUp("#s1-sub", 1.6);
+  fadeIn("#s1-rb",   1.9, 0.4);
+
+  /* ── S2: counter 0→3 ── */
+  fadeIn("#s2-pill",  3.2, 0.35);
+  pop("#s2-num",      3.4);
+  counter("#s2-num",  0, 3, 1.0, 3.5);
+  slideUp("#s2-label",3.8);
+  slideUp("#s2-sub",  4.2);
+  fadeIn("#s2-rb",    4.5, 0.35);
+
+  /* ── S3: агент работает ── */
+  fadeIn("#s3-pill",     6.8, 0.35);
+  slideUp("#s3-eyebrow", 6.95);
+  slideUp("#s3-headline",7.1);
+  fadeIn("#s3-node-user",7.8, 0.4);
+  drawPath("#s3-line1",  8.8, 0.9);
+  fadeIn("#s3-node-hist",9.5, 0.4);
+  drawPath("#s3-line2",  10.2, 0.9);
+  fadeIn("#s3-node-api", 11.0, 0.4);
+  fadeIn("#s3-rb",       11.8, 0.4);
+  /* yoyo glow on history node */
+  tl.to("#s3-node-hist", {boxShadow:"0 0 28px rgba(91,139,255,0.5)", duration:0.7, yoyo:true, repeat:2}, 11.5);
+
+  /* ── S4: context grows — cell-grid (паттерн H) ── */
+  fadeIn("#s4-pill",        13.4, 0.35);
+  slideUp("#s4-headline",   13.55);
+  fadeIn("#s4-counter-wrap",14.3, 0.4);
+  fadeIn("#s4-grid",        14.3, 0.4);
+  counter("#s4-tokens", 0, 18400, 4.0, 14.5);
+  (function buildS4Grid(){
+    const grid = document.getElementById("s4-grid");
+    const N = 40;
+    const cells = [];
+    for (let i=0; i<N; i++){
+      const c = document.createElement("div"); c.className = "gcell";
+      const g = document.createElement("div"); g.className = "gcell-glow"; g.id = "s4g"+i;
+      c.appendChild(g); grid.appendChild(c); cells.push(g);
+    }
+    // три волны заполнения: blue → amber → orange (рост контекста)
+    const waves = [
+      {at:14.6, from:0,  to:9,  color:"#5B8BFF"},
+      {at:16.0, from:9,  to:24, color:"#F5B544"},
+      {at:17.4, from:24, to:40, color:"#E8742C"},
+    ];
+    waves.forEach(w => {
+      for (let i=w.from; i<w.to; i++){
+        const t = w.at + (i - w.from) * 0.05;
+        tl.to("#s4g"+i, {backgroundColor:w.color, opacity:0.9,
+          boxShadow:"0 0 10px "+w.color, duration:0.25, ease:"power2.out"}, t);
+      }
+    });
+  })();
+
+  /* ── S5: /compact ── */
+  fadeIn("#s5-pill",    20.1, 0.35);
+  slideUp("#s5-label",  20.3);
+  fadeIn("#s5-cmd",     20.6, 0.3);
+  typewriter("#s5-typed", "/compact", 20.7, 1.4);
+  fadeIn("#s5-or",      22.6, 0.3);
+  slideUp("#s5-newsess",23.0);
+  fadeIn("#s5-rb",      23.3, 0.35);
+
+  /* ── S6: переиспользуемые скрипты ── */
+  fadeIn("#s6-pill",     24.0, 0.35);
+  slideUp("#s6-eyebrow", 24.15);
+  slideUp("#s6-headline",24.3);
+  pop("#s6-card1",       28.4);
+  pop("#s6-card2",       30.1);
+  pop("#s6-card3",       32.3);
+  fadeIn("#s6-rb",       30.5, 0.35);
+  tl.to("#s6-card3", {boxShadow:"0 0 40px rgba(61,214,140,0.3)", duration:0.6, yoyo:true, repeat:2}, 32.5);
+
+  /* ── S7: токены в пустую ── */
+  fadeIn("#s7-pill",     32.6, 0.35);
+  slideUp("#s7-headline",32.75);
+  fadeIn("#s7-cols",     33.2, 0.4);
+  counter("#s7-cnt-left",  0, 1000, 2.8, 33.2, "");
+  counter("#s7-cnt-right", 0, 150,  2.8, 33.2, "");
+  fillBar("#s7-bar-left",  33.2, 2.8, 1.0);
+  fillBar("#s7-bar-right", 33.2, 2.8, 0.15);
+  /* donut «экономия 85%» (паттерн M) */
+  fadeIn("#s7-donut", 35.4, 0.4);
+  (function s7Donut(){
+    const p = document.querySelector("#s7-donut-fill");
+    const C = 2 * Math.PI * 84;            // длина окружности
+    p.style.strokeDasharray = C;
+    p.style.strokeDashoffset = C;
+    tl.to(p, {strokeDashoffset: C * (1 - 0.85), duration: 1.4, ease:"power2.out"}, 35.6);
+    const pct = document.querySelector("#s7-donut-pct");
+    const o = {n:0};
+    tl.to(o, {n:85, duration:1.4, ease:"power2.out",
+      onUpdate:()=> pct.textContent = Math.round(o.n) + "%"}, 35.6);
+  })();
+
+  /* ── S8: не только OPUS ── */
+  fadeIn("#s8-pill",    37.9, 0.35);
+  slideUp("#s8-eyebrow",38.05);
+  pop("#s8-o", 38.5);
+  pop("#s8-p", 38.7);
+  pop("#s8-u", 38.9);
+  pop("#s8-s", 39.1);
+  slideUp("#s8-sub",    39.4);
+  fadeIn("#s8-hint",    40.2, 0.4);
+  fadeIn("#s8-rb",      40.8, 0.35);
+  /* yoyo glow pulse on OPUS */
+  tl.to("#s8-o, #s8-p, #s8-u, #s8-s",
+    {textShadow:"0 0 120px var(--accent-orange)", duration:0.8, yoyo:true, repeat:3, stagger:0.05}, 39.5);
+
+  /* ── S9: Sonnet + Haiku ── */
+  fadeIn("#s9-pill",     43.4, 0.35);
+  slideUp("#s9-headline",43.55);
+  pop("#s9-card1",       46.6);
+  pop("#s9-card2",       47.7);
+  fadeIn("#s9-footer",   48.3, 0.4);
+  fadeIn("#s9-rb",       48.8, 0.35);
+  tl.to("#s9-card1", {boxShadow:"0 0 44px rgba(91,139,255,0.3)", duration:0.8, yoyo:true, repeat:2}, 47.0);
+  tl.to("#s9-card2", {boxShadow:"0 0 44px rgba(255,107,157,0.3)", duration:0.8, yoyo:true, repeat:2}, 48.2);
+
+  /* ── S10: контекстная инженерия + Lottie ── */
+  fadeIn("#s10-pill",  50.9, 0.3);
+  pop("#s10-term",     51.0);
+  fadeIn("#s10-sub",   51.5, 0.35);
+  fadeIn("#s10-lottie",50.9, 0.3);
+
+  /* ── S11: CTA ── */
+  fadeIn("#s11-pill",   52.9, 0.35);
+  slideUp("#s11-pre",   53.1);
+  pop("#s11-cta",       53.3);
+  pop("#s11-icon",      53.6);
+  slideUp("#s11-handle",53.9);
+  fadeIn("#s11-desc",   54.4, 0.35);
+  fadeIn("#s11-typed-wrap", 55.0, 0.3);
+  typewriter("#s11-typed", "и автоматизации — бесплатно", 55.1, 2.8);
+  fadeIn("#s11-link",   58.5, 0.4);
+  fadeIn("#s11-rb",     58.8, 0.35);
+  /* pulse glow on CTA card */
+  tl.to("#s11-cta", {boxShadow:"0 0 60px rgba(232,116,44,0.35)", duration:1.2, yoyo:true, repeat:3}, 54.0);
+  tl.to("#s11-icon", {boxShadow:"0 0 40px rgba(38,165,228,0.5)", duration:1.0, yoyo:true, repeat:4}, 54.2);
+
+  /* ── Переходы: чередование по смыслу (окна перекрыты на D) ── */
+  zoomPunch("#s1",  "#s2",  2.8);   // хук → цифра «3» (акцент)
+  push("#s2",       "#s3",  6.4);   // к Способу 1 (листаем вперёд)
+  crossfade("#s3",  "#s4",  13.0);  // агент работает → контекст растёт (продолжение)
+  wipe("#s4",       "#s5",  19.7);  // проблема → решение /compact (контраст)
+  push("#s5",       "#s6",  23.6);  // к Способу 2 (листаем вперёд)
+  crossfade("#s6",  "#s7",  32.2);  // скрипты → токены в пустую (следствие)
+  push("#s7",       "#s8",  37.5);  // к Способу 3 (листаем вперёд)
+  crossfade("#s8",  "#s9",  43.0);  // opus → sonnet/haiku (продолжение)
+  wipeUp("#s9",     "#s10", 50.5);  // к выводу (подъём к итогу)
+  wipeUp("#s10",    "#s11", 52.5);  // вывод → CTA (подъём к итогу)
+
+  /* ════ КАРАОКЕ-СУБТИТРЫ (выверенный транскрипт) ════ */
+  const CAP = [{"text":"Если","start":0.05,"end":0.24},{"text":"ты","start":0.24,"end":0.33},{"text":"постоянно","start":0.39,"end":0.89},{"text":"упираешься","start":0.89,"end":1.46},{"text":"в","start":1.46,"end":1.52},{"text":"лимиты","start":1.52,"end":1.85},{"text":"Клод Код,","start":1.89,"end":2.39},{"text":"слушай","start":2.5,"end":2.76},{"text":"внимательно.","start":2.76,"end":3.17},{"text":"Вот","start":3.23,"end":3.33},{"text":"три","start":3.33,"end":3.48},{"text":"простых","start":3.48,"end":3.83},{"text":"способа","start":3.83,"end":4.19},{"text":"получить","start":4.19,"end":4.53},{"text":"больше","start":4.59,"end":4.93},{"text":"использования","start":4.99,"end":5.53},{"text":"без","start":5.53,"end":5.69},{"text":"дополнительных","start":5.69,"end":6.32},{"text":"затрат.","start":6.33,"end":6.72},{"text":"Первое,","start":6.77,"end":7.15},{"text":"пойми,","start":7.15,"end":7.48},{"text":"как","start":7.48,"end":7.64},{"text":"агент","start":7.68,"end":7.92},{"text":"реально","start":7.92,"end":8.33},{"text":"работает.","start":8.33,"end":8.88},{"text":"Каждый","start":8.92,"end":9.12},{"text":"раз,","start":9.12,"end":9.28},{"text":"когда","start":9.28,"end":9.45},{"text":"ты","start":9.52,"end":9.57},{"text":"отправляешь","start":9.57,"end":10.02},{"text":"сообщения,","start":10.02,"end":10.53},{"text":"он","start":10.53,"end":10.63},{"text":"фактически","start":10.69,"end":11.18},{"text":"отправляет","start":11.2,"end":11.7},{"text":"всю","start":11.7,"end":11.83},{"text":"историю","start":11.89,"end":12.2},{"text":"вашего","start":12.2,"end":12.49},{"text":"разговора","start":12.54,"end":12.95},{"text":"целиком.","start":12.95,"end":13.36},{"text":"Сообщения,","start":13.41,"end":13.93},{"text":"вызовы","start":14,"end":14.35},{"text":"инструментов","start":14.35,"end":15.11},{"text":"и","start":15.11,"end":15.17},{"text":"так","start":15.17,"end":15.36},{"text":"далее.","start":15.36,"end":15.71},{"text":"Все","start":15.89,"end":16.03},{"text":"полностью.","start":16.03,"end":16.72},{"text":"И","start":16.72,"end":16.77},{"text":"естественно,","start":16.77,"end":17.29},{"text":"что","start":17.36,"end":17.47},{"text":"с","start":17.47,"end":17.51},{"text":"каждым","start":17.51,"end":17.73},{"text":"сообщением","start":17.79,"end":18.27},{"text":"этот","start":18.27,"end":18.46},{"text":"объем","start":18.46,"end":18.69},{"text":"становится","start":18.69,"end":19.07},{"text":"все","start":19.22,"end":19.31},{"text":"больше","start":19.31,"end":19.6},{"text":"и","start":19.6,"end":19.64},{"text":"больше.","start":19.64,"end":20.1},{"text":"Чтобы","start":20.17,"end":20.41},{"text":"снизить","start":20.41,"end":20.8},{"text":"этот","start":20.8,"end":21.03},{"text":"эффект,","start":21.03,"end":21.42},{"text":"почаще","start":21.42,"end":21.75},{"text":"запускай","start":21.75,"end":22.2},{"text":"команду","start":22.2,"end":22.6},{"text":"Compact","start":22.62,"end":22.88},{"text":"или","start":22.88,"end":23.02},{"text":"начинай","start":23.02,"end":23.35},{"text":"новую","start":23.39,"end":23.58},{"text":"сессию.","start":23.62,"end":24},{"text":"Второе,","start":24.05,"end":24.39},{"text":"перестань","start":24.39,"end":24.9},{"text":"позволять","start":24.9,"end":25.35},{"text":"агенту","start":25.41,"end":25.73},{"text":"переписывать","start":25.73,"end":26.35},{"text":"один","start":26.5,"end":26.63},{"text":"и","start":26.63,"end":26.68},{"text":"тот","start":26.68,"end":26.85},{"text":"же","start":26.85,"end":26.95},{"text":"код","start":27.01,"end":27.09},{"text":"снова","start":27.12,"end":27.38},{"text":"и","start":27.38,"end":27.5},{"text":"снова.","start":27.5,"end":27.95},{"text":"Скажи","start":28.01,"end":28.21},{"text":"ему","start":28.22,"end":28.36},{"text":"создать","start":28.36,"end":28.72},{"text":"переиспользуемые","start":28.72,"end":29.54},{"text":"скрипты","start":29.54,"end":29.87},{"text":"и","start":29.89,"end":29.94},{"text":"инструменты","start":29.94,"end":30.51},{"text":"для","start":30.51,"end":30.65},{"text":"повторяющихся","start":30.66,"end":31.32},{"text":"действий,","start":31.32,"end":31.93},{"text":"то","start":31.93,"end":32.03},{"text":"есть","start":32.03,"end":32.21},{"text":"скиллы.","start":32.26,"end":32.56},{"text":"Потому","start":32.61,"end":32.88},{"text":"что","start":32.88,"end":32.99},{"text":"каждый","start":33.04,"end":33.36},{"text":"раз,","start":33.36,"end":33.57},{"text":"когда","start":33.57,"end":33.84},{"text":"ему","start":33.84,"end":34},{"text":"приходится","start":34,"end":34.53},{"text":"заново","start":34.53,"end":34.79},{"text":"писать","start":34.86,"end":35.16},{"text":"или","start":35.16,"end":35.32},{"text":"корректировать","start":35.32,"end":35.92},{"text":"одно","start":36.06,"end":36.27},{"text":"и","start":36.27,"end":36.32},{"text":"то","start":36.32,"end":36.43},{"text":"же,","start":36.43,"end":36.71},{"text":"ты","start":36.75,"end":36.81},{"text":"сжигаешь","start":36.81,"end":37.16},{"text":"токены","start":37.16,"end":37.43},{"text":"в","start":37.43,"end":37.47},{"text":"пустую.","start":37.47,"end":37.88},{"text":"Третье,","start":37.93,"end":38.31},{"text":"не","start":38.31,"end":38.44},{"text":"используй","start":38.44,"end":39.03},{"text":"опус","start":39.03,"end":39.23},{"text":"всегда.","start":39.29,"end":39.84},{"text":"В","start":39.84,"end":39.89},{"text":"каждом","start":39.89,"end":40.17},{"text":"написанном","start":40.23,"end":40.66},{"text":"скилле","start":40.66,"end":40.85},{"text":"ты","start":40.91,"end":41},{"text":"можешь","start":41,"end":41.3},{"text":"контролировать,","start":41.3,"end":42.02},{"text":"какая","start":42.02,"end":42.19},{"text":"именно","start":42.34,"end":42.57},{"text":"модель","start":42.57,"end":42.86},{"text":"запускается.","start":42.86,"end":43.44},{"text":"И","start":43.44,"end":43.49},{"text":"поверьте,","start":43.49,"end":43.87},{"text":"для","start":43.87,"end":44},{"text":"большинства","start":44,"end":44.45},{"text":"задач","start":44.51,"end":44.71},{"text":"действительно","start":44.71,"end":45.29},{"text":"хватает","start":45.29,"end":45.6},{"text":"таких","start":45.6,"end":45.79},{"text":"моделей,","start":45.93,"end":46.24},{"text":"как","start":46.24,"end":46.52},{"text":"Sonnet","start":46.59,"end":46.82},{"text":"4.6","start":46.94,"end":47.32},{"text":"или","start":47.32,"end":47.65},{"text":"Haiku.","start":47.65,"end":48.2},{"text":"И","start":48.2,"end":48.25},{"text":"они","start":48.25,"end":48.41},{"text":"обе","start":48.41,"end":48.53},{"text":"значительно","start":48.59,"end":49.12},{"text":"дешевле","start":49.16,"end":49.49},{"text":"и","start":49.49,"end":49.54},{"text":"меньше","start":49.54,"end":49.86},{"text":"потребляют","start":49.86,"end":50.38},{"text":"лимиты.","start":50.38,"end":50.88},{"text":"Все","start":50.93,"end":51.03},{"text":"это","start":51.03,"end":51.18},{"text":"называется","start":51.18,"end":51.7},{"text":"контекстной","start":51.7,"end":52.23},{"text":"инженерией.","start":52.27,"end":52.9},{"text":"В","start":52.9,"end":52.97},{"text":"своем","start":52.97,"end":53.25},{"text":"телеграм","start":53.25,"end":53.7},{"text":"канале","start":53.7,"end":54.05},{"text":"в","start":54.05,"end":54.1},{"text":"закрепленном","start":54.1,"end":54.77},{"text":"сообщении","start":54.77,"end":55.27},{"text":"собираю","start":55.41,"end":55.68},{"text":"базу","start":55.68,"end":55.87},{"text":"знаний","start":55.91,"end":56.24},{"text":"по","start":56.24,"end":56.28},{"text":"нейросетям","start":56.42,"end":56.9},{"text":"и","start":56.95,"end":56.96},{"text":"автоматизации.","start":56.96,"end":58},{"text":"Если","start":58.05,"end":58.22},{"text":"тебе","start":58.22,"end":58.43},{"text":"это","start":58.48,"end":58.57},{"text":"интересно,","start":58.64,"end":59.15},{"text":"переходи","start":59.15,"end":59.59},{"text":"и","start":59.59,"end":59.64},{"text":"забирай","start":59.64,"end":60.02},{"text":"полезные","start":60.02,"end":60.35},{"text":"материалы","start":60.51,"end":60.95},{"text":"бесплатно.","start":60.95,"end":61.61},{"text":"Ссылка","start":61.68,"end":61.91},{"text":"в","start":61.91,"end":61.95},{"text":"шапке","start":61.95,"end":62.17},{"text":"профиля.","start":62.17,"end":62.64}];
+  (function buildCaptions(){
+    const band = document.getElementById("cap-band");
+    const MAXW = 3, MAXCHARS = 20, PAUSE = 0.3, BUF = 0.35;
+    const groups = [];
+    let cur = [], curChars = 0;
+    for (let i=0; i<CAP.length; i++){
+      const w = CAP[i];
+      // закрыть группу ПЕРЕД добавлением, если переполнит
+      if (cur.length && (cur.length >= MAXW || curChars + w.text.length > MAXCHARS)){
+        groups.push({words:cur.slice(), start:cur[0].start, end:cur[cur.length-1].end});
+        cur = []; curChars = 0;
+      }
+      cur.push(w); curChars += w.text.length + 1;
+      const nx = CAP[i+1];
+      const punct = /[,.!?:]$/.test(w.text);
+      const pause = nx ? (nx.start - w.end) : 999;
+      if (!nx || punct || pause >= PAUSE){
+        groups.push({words:cur.slice(), start:cur[0].start, end:cur[cur.length-1].end});
+        cur = []; curChars = 0;
+      }
+    }
+    groups.forEach((g, gi) => {
+      const el = document.createElement("div");
+      el.className = "cap-group"; el.id = "cg"+gi;
+      g.words.forEach((w, wi) => {
+        const s = document.createElement("span");
+        s.className = "cap-word"; s.id = "cw"+gi+"_"+wi;
+        s.textContent = w.text;
+        el.appendChild(s);
+      });
+      band.appendChild(el);
+      const next = groups[gi+1];
+      const visStart = g.start;
+      const visEnd = next ? Math.min(next.start, g.end + BUF) : g.end + BUF;
+      tl.set(el, {opacity:1}, visStart);
+      tl.set(el, {opacity:0}, visEnd);
+      g.words.forEach((w, wi) => {
+        tl.set("#cw"+gi+"_"+wi, {color:"#8A8A8A", textShadow:"none"}, visStart);
+        tl.to("#cw"+gi+"_"+wi,
+          {color:"#F5B544", textShadow:"0 0 22px rgba(245,181,68,0.55)", duration:0.08, ease:"none"},
+          Math.max(visStart, w.start));
+      });
+    });
+  })();
+
+  window.__timelines["root"] = tl;
+
+  /* ── Lottie: sparkles в S10 ── */
+  window.__hfLottie = window.__hfLottie || [];
+  const sparkles = lottie.loadAnimation({
+    container: document.getElementById("s10-lottie"),
+    renderer: "svg",
+    loop: true,
+    autoplay: false,
+    path: "assets/lottie/sparkles.json"
+  });
+  window.__hfLottie.push(sparkles);
+
+  /* ── Three.js: particles in S1 ── */
+  (function () {
+    function mulberry32(seed){return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
+    const rand = mulberry32(42);
+    const COUNT = 180;
+    const PALETTE = [0xF5B544,0xF5B544,0xE8742C,0xE8742C,0xF5B544,0xE8742C,0x5B8BFF,0x3DD68C];
+
+    const canvas = document.getElementById("s1-canvas");
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+    renderer.setSize(1080, 1920, false);
+    renderer.setPixelRatio(1);
+
+    const scene3 = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, 1080/1920, 0.1, 100);
+    camera.position.set(0, 0, 6);
+
+    const positions = new Float32Array(COUNT*3);
+    const colors    = new Float32Array(COUNT*3);
+    const baseZ     = new Float32Array(COUNT);
+    const c = new THREE.Color();
+    for (let i=0; i<COUNT; i++) {
+      const x = (rand()-0.5)*8, y = (rand()-0.5)*14, z = (rand()-0.5)*10;
+      positions[i*3]=x; positions[i*3+1]=y; positions[i*3+2]=z; baseZ[i]=z;
+      c.setHex(PALETTE[Math.floor(rand()*PALETTE.length)]);
+      colors[i*3]=c.r; colors[i*3+1]=c.g; colors[i*3+2]=c.b;
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute("color",    new THREE.BufferAttribute(colors, 3));
+    const mat = new THREE.PointsMaterial({
+      size:0.07, vertexColors:true, transparent:true, opacity:0.75,
+      blending:THREE.AdditiveBlending, depthWrite:false, sizeAttenuation:true
+    });
+    const points = new THREE.Points(geo, mat);
+    scene3.add(points);
+
+    const Z_MIN=-8, Z_MAX=4, Z_RANGE=Z_MAX-Z_MIN, DRIFT=0.4;
+
+    function renderAt(time) {
+      const t = time;
+      points.rotation.y = t*0.04;
+      points.rotation.x = Math.sin(t*0.03)*0.08;
+      const pa = geo.attributes.position;
+      for (let i=0; i<COUNT; i++) {
+        const phase = (baseZ[i]-Z_MIN)/Z_RANGE;
+        const zOff  = (t*DRIFT+phase*Z_RANGE)%Z_RANGE;
+        pa.array[i*3+2] = Z_MIN+zOff;
+      }
+      pa.needsUpdate = true;
+      camera.position.x = Math.sin(t*0.07)*0.25;
+      camera.position.y = Math.cos(t*0.05)*0.15;
+      renderer.render(scene3, camera);
+    }
+
+    window.addEventListener("hf-seek", (e) => renderAt(e.detail.time));
+    renderAt(window.__hfThreeTime || 0);
+  })();
+
+})();
+</script>
+</body>
+</html>

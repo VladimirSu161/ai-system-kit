@@ -1,0 +1,66 @@
+<!doctype html>
+<!--
+  БЛОК-ШАБЛОН: Переходы между сценами  (паттерн «Transitions»)
+  ============================================================
+  Два хелпера в общем GSAP timeline:
+   • crossfade(outId,inId,outAt,D) — мягкий «дорогой» переход (scale+fade).
+   • wipe(outId,inId,outAt,D)      — входящая «вытирает» кадр через clip-path.
+  КАК ПОДКЛЮЧАТЬ: окна сцен (data-start/duration) должны ПЕРЕКРЫВАТЬСЯ на
+  длительность перехода D (вторая сцена стартует за D до конца первой),
+  иначе HyperFrames спрячет одну из них и перехода не будет видно.
+  Входящая для wipe должна стартовать с CSS clip-path: inset(0 0 0 100%).
+  Имена в data-composition-id и __timelines["..."] — заменить на своё.
+-->
+<html lang="ru"><head><meta charset="UTF-8"/>
+<meta name="viewport" content="width=1080, height=1920"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+  :root{--bg:#050505;--text:#F5F5F5;--accent-amber:#F5B544;--accent-blue:#5B8BFF;--accent-green:#3DD68C;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:var(--bg);
+            font-family:"Inter",system-ui,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+  #root{position:relative;width:1080px;height:1920px;overflow:hidden}
+  .scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;will-change:transform,opacity}
+  .scene h1{font-size:140px;font-weight:800}
+  #s1{background:radial-gradient(ellipse at 50% 45%, rgba(245,181,68,0.10), transparent 60%), var(--bg)}
+  #s2{background:radial-gradient(ellipse at 50% 45%, rgba(91,139,255,0.12), transparent 60%), var(--bg);
+      clip-path: inset(0 0 0 100%);}   /* стартует скрытой справа для wipe */
+  #s3{background:radial-gradient(ellipse at 50% 45%, rgba(61,214,140,0.12), transparent 60%), var(--bg)}
+  #s1 h1{color:var(--accent-amber)} #s2 h1{color:var(--accent-blue)} #s3 h1{color:var(--accent-green)}
+</style></head><body>
+<div id="root" data-composition-id="ИМЯ" data-width="1080" data-height="1920" data-start="0" data-duration="6.5">
+  <!-- окна сцен перекрываются на время перехода (0.5с) -->
+  <div class="scene clip" id="s1" data-start="0"   data-duration="2.5" data-track-index="0"><h1>СЦЕНА 1</h1></div>
+  <div class="scene clip" id="s2" data-start="2.0" data-duration="2.5" data-track-index="1"><h1>СЦЕНА 2</h1></div>
+  <div class="scene clip" id="s3" data-start="4.0" data-duration="2.5" data-track-index="2"><h1>СЦЕНА 3</h1></div>
+</div>
+<script>
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+
+  // ── helper: crossfade + scale (мягкий «дорогой» переход) ──
+  // outAt — момент начала перехода; уходящая сцена масштабируется вверх и гаснет,
+  // входящая появляется из 0.94 в 1.0. Перекрытие D.
+  function crossfade(outId, inId, outAt, D){
+    D = D || 0.5;
+    tl.to(outId,  { opacity:0, scale:1.08, duration:D, ease:"power2.in" }, outAt);
+    tl.fromTo(inId, { opacity:0, scale:0.94 },
+                    { opacity:1, scale:1,    duration:D, ease:"power2.out" }, outAt);
+  }
+
+  // ── helper: wipe (входящая «вытирает» кадр через clip-path) ──
+  // Входящая сцена раскрывается справа налево; уходящая просто гаснет под ней.
+  function wipe(outId, inId, outAt, D){
+    D = D || 0.6;
+    tl.to(outId, { opacity:0, duration:D, ease:"power1.in" }, outAt + D*0.4);
+    tl.fromTo(inId, { clipPath:"inset(0 0 0 100%)" },
+                    { clipPath:"inset(0 0 0 0%)", duration:D, ease:"power3.inOut" }, outAt);
+  }
+
+  // S1 -> S2 : crossfade на 2.0с
+  crossfade("#s1", "#s2", 2.0, 0.5);
+  // S2 -> S3 : wipe на 4.0с
+  wipe("#s2", "#s3", 4.0, 0.6);
+
+  window.__timelines["ИМЯ"] = tl;
+</script></body></html>

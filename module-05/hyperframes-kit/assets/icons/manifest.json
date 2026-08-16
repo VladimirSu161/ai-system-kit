@@ -1,0 +1,434 @@
+{
+  "icons": {
+    "claude": {
+      "file": "claude.svg",
+      "label": "Claude",
+      "bg": "#CC5500",
+      "color": "#ffffff",
+      "aliases": [
+        "anthropic",
+        "claude ai",
+        "claude.ai"
+      ]
+    },
+    "openai": {
+      "file": "openai.svg",
+      "label": "ChatGPT",
+      "bg": "#10A37F",
+      "color": "#ffffff",
+      "aliases": [
+        "chatgpt",
+        "gpt",
+        "gpt-4",
+        "gpt4"
+      ]
+    },
+    "gemini": {
+      "file": "gemini.svg",
+      "label": "Gemini",
+      "bg": "#4285F4",
+      "color": "#ffffff",
+      "aliases": [
+        "google gemini",
+        "bard"
+      ]
+    },
+    "perplexity": {
+      "file": "perplexity.svg",
+      "label": "Perplexity",
+      "bg": "#20808D",
+      "color": "#ffffff",
+      "aliases": [
+        "perplexity ai"
+      ]
+    },
+    "mistral": {
+      "file": "mistral.svg",
+      "label": "Mistral",
+      "bg": "#FF7000",
+      "color": "#ffffff",
+      "aliases": [
+        "mistral ai",
+        "mistralai"
+      ]
+    },
+    "huggingface": {
+      "file": "huggingface.svg",
+      "label": "HuggingFace",
+      "bg": "#FFD21E",
+      "color": "#1a1a1a",
+      "aliases": [
+        "hugging face",
+        "hf"
+      ]
+    },
+    "notion": {
+      "file": "notion.svg",
+      "label": "Notion",
+      "bg": "#000000",
+      "color": "#ffffff",
+      "aliases": [
+        "notion.so"
+      ]
+    },
+    "n8n": {
+      "file": "n8n.svg",
+      "label": "n8n",
+      "bg": "#EA4B71",
+      "color": "#ffffff",
+      "aliases": [
+        "n8n.io"
+      ]
+    },
+    "make": {
+      "file": "make.svg",
+      "label": "Make",
+      "bg": "#6D00CC",
+      "color": "#ffffff",
+      "aliases": [
+        "integromat",
+        "make.com"
+      ]
+    },
+    "zapier": {
+      "file": "zapier.svg",
+      "label": "Zapier",
+      "bg": "#FF4A00",
+      "color": "#ffffff",
+      "aliases": [
+        "zapier.com"
+      ]
+    },
+    "airtable": {
+      "file": "airtable.svg",
+      "label": "Airtable",
+      "bg": "#18BFFF",
+      "color": "#ffffff",
+      "aliases": []
+    },
+    "slack": {
+      "file": "slack.svg",
+      "label": "Slack",
+      "bg": "#4A154B",
+      "color": "#ffffff",
+      "aliases": []
+    },
+    "telegram": {
+      "file": "telegram.svg",
+      "label": "Telegram",
+      "bg": "#26A5E4",
+      "color": "#ffffff",
+      "aliases": [
+        "tg"
+      ]
+    },
+    "github": {
+      "file": "github.svg",
+      "label": "GitHub",
+      "bg": "#181717",
+      "color": "#ffffff",
+      "aliases": []
+    },
+    "figma": {
+      "file": "figma.svg",
+      "label": "Figma",
+      "bg": "#F24E1E",
+      "color": "#ffffff",
+      "aliases": []
+    },
+    "youtube": {
+      "file": "youtube.svg",
+      "label": "YouTube",
+      "bg": "#FF0000",
+      "color": "#ffffff",
+      "aliases": [
+        "yt"
+      ]
+    },
+    "instagram": {
+      "file": "instagram.svg",
+      "label": "Instagram",
+      "bg": "#E4405F",
+      "color": "#ffffff",
+      "aliases": [
+        "ig"
+      ]
+    },
+    "google": {
+      "file": "google.svg",
+      "label": "Google",
+      "bg": "#4285F4",
+      "color": "#ffffff",
+      "aliases": []
+    },
+    "gdrive": {
+      "file": "gdrive.svg",
+      "label": "Google Drive",
+      "bg": "#34A853",
+      "color": "#ffffff",
+      "aliases": [
+        "google drive",
+        "drive"
+      ]
+    },
+    "gdocs": {
+      "file": "gdocs.svg",
+      "label": "Google Docs",
+      "bg": "#4285F4",
+      "color": "#ffffff",
+      "aliases": [
+        "google docs",
+        "docs"
+      ]
+    },
+    "python": {
+      "file": "python.svg",
+      "label": "Python",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "devicon-original",
+      "aliases": []
+    },
+    "nodejs": {
+      "file": "nodejs.svg",
+      "label": "Nodejs",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "devicon-original",
+      "aliases": []
+    },
+    "kubernetes": {
+      "file": "kubernetes.svg",
+      "label": "Kubernetes",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "devicon-original",
+      "aliases": []
+    },
+    "docker": {
+      "file": "docker.svg",
+      "label": "Docker",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "devicon-original",
+      "aliases": []
+    },
+    "golang": {
+      "file": "golang.svg",
+      "label": "Golang",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "devicon-original",
+      "aliases": [
+        "go"
+      ]
+    },
+    "threads": {
+      "file": "threads.svg",
+      "label": "Threads",
+      "bg": "#000000",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "simple-icons",
+      "aliases": []
+    },
+    "midjourney": {
+      "file": "midjourney.svg",
+      "label": "Midjourney",
+      "bg": "#1A1A1A",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "lobehub-mono",
+      "aliases": []
+    },
+    "groq": {
+      "file": "groq.svg",
+      "label": "Groq",
+      "bg": "#1A1A1A",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "lobehub-mono",
+      "aliases": []
+    },
+    "deepseek": {
+      "file": "deepseek.svg",
+      "label": "Deepseek",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "lobehub",
+      "aliases": []
+    },
+    "linkedin": {
+      "file": "linkedin.svg",
+      "label": "Linkedin",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "devicon-original",
+      "aliases": []
+    },
+    "x": {
+      "file": "x.svg",
+      "label": "X",
+      "bg": "#000000",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "simple-icons",
+      "aliases": []
+    },
+    "twitter": {
+      "file": "twitter.svg",
+      "label": "Twitter",
+      "bg": "#000000",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "simple-icons",
+      "aliases": [
+        "x"
+      ]
+    },
+    "reddit": {
+      "file": "reddit.svg",
+      "label": "Reddit",
+      "bg": "#FF4500",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "simple-icons",
+      "aliases": []
+    },
+    "cursor": {
+      "file": "cursor.svg",
+      "label": "Cursor",
+      "bg": "#000000",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "simple-icons",
+      "aliases": []
+    },
+    "facebook": {
+      "file": "facebook.svg",
+      "label": "Facebook",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "devicon-original",
+      "aliases": []
+    },
+    "bilibili": {
+      "file": "bilibili.svg",
+      "label": "Bilibili",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "lobehub",
+      "aliases": []
+    },
+    "openrouter": {
+      "file": "openrouter.svg",
+      "label": "Openrouter",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "lobehub",
+      "aliases": []
+    },
+    "nvidia": {
+      "file": "nvidia.svg",
+      "label": "Nvidia",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "lobehub",
+      "aliases": []
+    },
+    "kimi": {
+      "file": "kimi.svg",
+      "label": "Kimi",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "lobehub",
+      "aliases": []
+    },
+    "moonshot": {
+      "file": "moonshot.svg",
+      "label": "Moonshot",
+      "bg": "#1A1A1A",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "lobehub-mono",
+      "aliases": []
+    },
+    "codex": {
+      "file": "codex.svg",
+      "label": "Codex",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "lobehub",
+      "aliases": []
+    },
+    "pinterest": {
+      "file": "pinterest.svg",
+      "label": "Pinterest",
+      "bg": "#BD081C",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "simple-icons",
+      "aliases": []
+    },
+    "youmind": {
+      "file": "youmind.svg",
+      "label": "Youmind",
+      "bg": "#1A1A1A",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "lobehub-mono",
+      "aliases": []
+    },
+    "seedream": {
+      "file": "seedream.svg",
+      "label": "Seedream",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "lobehub",
+      "aliases": [
+        "bytedance"
+      ]
+    },
+    "tiktok": {
+      "file": "tiktok.svg",
+      "label": "Tiktok",
+      "bg": "#000000",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "simple-icons",
+      "aliases": []
+    },
+    "morph": {
+      "file": "morph.svg",
+      "label": "Morph",
+      "bg": "#1A1A1A",
+      "color": null,
+      "style": "color",
+      "source": "lobehub",
+      "aliases": []
+    },
+    "dribbble": {
+      "file": "dribbble.svg",
+      "label": "Dribbble",
+      "bg": "#EA4C89",
+      "color": "#ffffff",
+      "style": "mono",
+      "source": "simple-icons",
+      "aliases": []
+    }
+  }
+}

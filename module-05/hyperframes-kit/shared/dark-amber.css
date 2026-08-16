@@ -1,0 +1,292 @@
+/* ══════════════════════════════════════════════════════════════
+   DARK AMBER — единый источник CSS для всех видео.
+   Подключение из композиции (index.html в корне проекта):
+     <link rel="stylesheet" href="shared/dark-amber.css">
+   НЕ копировать эти правила в <style> — при изменении темы
+   правится только этот файл. В <style> композиции остаются
+   только сценоспецифичные правила (#s1-canvas, #s7-donut и т.п.).
+   Источник: themes/dark-amber-reference.md + суперсет классов
+   из _reference-video64.html и index.html (сведено 2026-07-02).
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Локальные шрифты (assets/fonts/, латиница+кириллица) ──
+   Google Fonts <link> в композициях НЕ нужен — рендер автономный. */
+@font-face { font-family:"Inter"; font-style:normal; font-weight:400; font-display:swap;
+  src: url("/assets/fonts/inter-v20-cyrillic_latin-regular.woff2") format("woff2"); }
+@font-face { font-family:"Inter"; font-style:normal; font-weight:500; font-display:swap;
+  src: url("/assets/fonts/inter-v20-cyrillic_latin-500.woff2") format("woff2"); }
+@font-face { font-family:"Inter"; font-style:normal; font-weight:700; font-display:swap;
+  src: url("/assets/fonts/inter-v20-cyrillic_latin-700.woff2") format("woff2"); }
+@font-face { font-family:"Inter"; font-style:normal; font-weight:800; font-display:swap;
+  src: url("/assets/fonts/inter-v20-cyrillic_latin-800.woff2") format("woff2"); }
+@font-face { font-family:"Inter"; font-style:normal; font-weight:900; font-display:swap;
+  src: url("/assets/fonts/inter-v20-cyrillic_latin-900.woff2") format("woff2"); }
+@font-face { font-family:"JetBrains Mono"; font-style:normal; font-weight:400; font-display:swap;
+  src: url("/assets/fonts/jetbrains-mono-v24-cyrillic_latin-regular.woff2") format("woff2"); }
+@font-face { font-family:"JetBrains Mono"; font-style:normal; font-weight:500; font-display:swap;
+  src: url("/assets/fonts/jetbrains-mono-v24-cyrillic_latin-500.woff2") format("woff2"); }
+
+.clip { position: absolute; }
+
+:root {
+  --bg: #050505;
+  --bg-grid: rgba(255,255,255,0.05);
+  --text: #F5F5F5;
+  --muted: #8A8A8A;
+  --faint: #4A4A4A;
+  --accent-orange: #E8742C;
+  --accent-blue:   #5B8BFF;
+  --accent-amber:  #F5B544;
+  --accent-green:  #3DD68C;
+  --accent-pink:   #FF6B9D;
+  --accent-red:    #FF5C5C;
+  --card-bg:       rgba(255,255,255,0.03);
+  --card-border:   rgba(255,255,255,0.08);
+  --card-radius:   22px;
+
+  /* ── Зоны кадра (единственный источник правды, 2026-08-03) ──
+     Раньше .scene-inner (200…1220) и #cap-band (1080…1250) перекрывались
+     на 140px, и контент сцен регулярно наезжал на караоке-субтитры. Теперь
+     высота контент-зоны ВЫЧИСЛЯЕТСЯ из положения полосы субтитров, поэтому
+     развести их обратно уже нельзя — правка одной переменной двигает обе.
+     Схема повторяет светлую тему, где зоны изначально не пересекались. */
+  --cap-top:    1080px;  /* верх полосы субтитров */
+  --cap-h:       170px;
+  --scene-top:   200px;  /* верх контент-зоны сцены */
+  --scene-gap:    32px;  /* воздух между контентом и субтитрами */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; }
+
+body {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 42%, rgba(255,255,255,0.045) 0%, transparent 65%),
+    repeating-linear-gradient(0deg,  var(--bg-grid) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(90deg, var(--bg-grid) 0 1px, transparent 1px 64px),
+    var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+#root { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+.scene { top: 0; left: 0; width: 1080px; height: 1920px; }
+
+/* Основной блок сцены — живёт СТРОГО над полосой субтитров (см. reference §8).
+   Высота считается от --cap-top: контент физически не достаёт до караоке.
+   Если блок не влезает — это видно сразу: `npm run check` репортит overflow
+   контейнера. Значит надо уменьшить графику, а не сдвигать блок вручную. */
+.scene-inner {
+  position: absolute; top: var(--scene-top); left: 0;
+  width: 1080px;
+  height: calc(var(--cap-top) - var(--scene-top) - var(--scene-gap));
+  display: flex; flex-direction: column;
+  align-items: flex-start; padding: 0 72px;
+  overflow: clip; overflow-clip-margin: 90px;
+}
+.scene-inner.centered { align-items: center; text-align: center; justify-content: center; }
+
+/* ── Eyebrow-пилюля (§4) ── */
+.pill {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 14px 28px; border-radius: 100px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.14);
+  font: 500 26px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.4);
+  margin-bottom: 44px;
+}
+.pill-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Типографика (§3) ── */
+.h1  { font-size: 116px; font-weight: 900; line-height: 0.98; letter-spacing: -0.02em; }
+.h2  { font-size: 88px;  font-weight: 900; line-height: 1.02; letter-spacing: -0.02em; }
+.h3  { font-size: 64px;  font-weight: 800; line-height: 1.08; letter-spacing: -0.01em; }
+.hero-num { font-size: 320px; font-weight: 900; line-height: 1; letter-spacing: -0.04em;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 120px currentColor; }
+.body-text { font-size: 40px; font-weight: 400; line-height: 1.45; color: var(--muted); }
+.mono-label { font: 500 28px/1.2 "JetBrains Mono", monospace; letter-spacing: 0.06em;
+              text-transform: uppercase; color: var(--muted); }
+.rainbow {
+  background: linear-gradient(90deg, #E8742C 0%, #F5B544 35%, #3DD68C 65%, #5B8BFF 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ── Карточки (паттерны B/C, §6) ── */
+.card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--card-radius); padding: 34px 40px;
+  display: flex; align-items: center; gap: 28px; width: 100%;
+  margin-bottom: 18px;
+}
+.card-icon  { font-size: 52px; line-height: 1; flex-shrink: 0; width: 88px; text-align: center; }
+.card-title { font-size: 44px; font-weight: 800; line-height: 1.15; color: var(--text); }
+.card-sub   { font-size: 24px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.08em;
+              text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+
+/* ── Прогресс-бар одиночный (fillBar) ── */
+.fill-bar-track {
+  width: 100%; height: 14px; border-radius: 100px;
+  background: rgba(255,255,255,0.06); overflow: hidden; margin-top: 12px;
+}
+.fill-bar-fill {
+  height: 100%; border-radius: 100px;
+  transform-origin: left center; transform: scaleX(0);
+}
+
+/* ── Bar chart (паттерн L) ── */
+.bar-row   { width: 100%; margin-bottom: 22px; }
+.bar-label { font: 700 32px/1.2 "Inter", sans-serif; color: var(--text); margin-bottom: 10px; }
+.bar-track { width: 100%; height: 16px; border-radius: 100px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 100px; transform-origin: left center; transform: scaleX(0); }
+
+/* ── Two-column stat (паттерн I) — две семьи колонок ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; }
+/* вариант «блок со счётчиком и баром» (video 64) */
+.col-block { border-radius: 22px; padding: 36px 32px; display: flex; flex-direction: column; gap: 16px; }
+.col-count { font-size: 96px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+.col-unit  { font: 500 24px/1 "JetBrains Mono", monospace; color: var(--muted);
+             letter-spacing: 0.08em; text-transform: uppercase; }
+/* вариант «карточка с подписью/значением» */
+.col-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--card-radius); padding: 40px 32px;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px;
+}
+.col-label { font: 700 28px/1 "JetBrains Mono", monospace; letter-spacing: 0.10em; text-transform: uppercase; }
+.col-value { font: 900 52px/1.1 "Inter", sans-serif; }
+.col-sub   { font: 400 32px/1.4 "Inter", sans-serif; color: var(--muted); }
+
+/* ── Cell-grid (паттерн H) ── */
+.cellgrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; width: 800px; }
+.gcell { aspect-ratio: 1/1; border-radius: 10px; background: rgba(255,255,255,0.035);
+         border: 1px solid rgba(255,255,255,0.06); position: relative; }
+.gcell-glow { position: absolute; inset: 5px; border-radius: 7px; opacity: 0; filter: blur(1px); }
+
+/* ── Donut (паттерн M) ── */
+.donut-track { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 16; }
+.donut-fill  { fill: none; stroke: var(--accent-green); stroke-width: 16; stroke-linecap: round;
+               filter: drop-shadow(0 0 8px var(--accent-green));
+               transform: rotate(-90deg); transform-origin: 100px 100px; }
+
+/* ── Статусный язык цвета (паттерн N «живой холст») ──
+   Статичные стартовые состояния; переходы между ними анимирует
+   хелпер setState()/setTag() из shared/helpers.js. */
+.state-tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  font: 700 24px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.state-tag::before { content: ""; width: 10px; height: 10px; border-radius: 50%;
+                     background: currentColor; box-shadow: 0 0 10px currentColor; }
+.st-ok   { color: var(--accent-green); }
+.st-warn { color: var(--accent-amber); }
+.st-fail { color: var(--accent-red); }
+/* модификаторы контейнера (карточка сервера/системы) */
+.box-ok   { border-color: rgba(61,214,140,0.45); background: rgba(61,214,140,0.06); }
+.box-warn { border-color: rgba(245,181,68,0.45); background: rgba(245,181,68,0.07); }
+.box-fail { border-color: rgba(255,92,92,0.55);  background: rgba(255,92,92,0.10); }
+/* слот под объект внутри живого холста (пунктир, как docker-контейнер) */
+.slot {
+  border: 2px dashed rgba(255,255,255,0.12); border-radius: 16px;
+  background: rgba(255,255,255,0.02);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 12px; padding: 20px;
+}
+.slot-label { font: 500 22px/1 "JetBrains Mono", monospace;
+              letter-spacing: 0.08em; color: var(--muted); }
+
+/* ── SVG-коннекторы (паттерн D) ── */
+.conn-svg path {
+  fill: none; stroke: currentColor; stroke-width: 4; stroke-linecap: round;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+.flow-node {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px; padding: 22px 30px;
+  font: 700 32px/1 "JetBrains Mono", monospace; text-transform: uppercase;
+  display: flex; align-items: center; gap: 16px;
+}
+
+/* ── Каретик для typewriter (§7.3) ── */
+.caret {
+  display: inline-block; width: 3px; height: 0.85em;
+  background: currentColor; margin-left: 4px;
+  vertical-align: text-bottom;
+  animation: blink 0.7s steps(2) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── Правый-нижний чип (x>540, y>1248 — сосед аватара, §8) ── */
+.rb-chip {
+  position: absolute; top: 1310px; left: 570px; width: 460px;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 100px; padding: 18px 36px;
+  font: 700 28px/1 "JetBrains Mono", monospace; letter-spacing: 0.08em;
+  color: var(--muted); text-transform: uppercase;
+}
+.rb-orange { background: rgba(232,116,44,0.10); border-color: rgba(232,116,44,0.30); color: var(--accent-orange); }
+.rb-blue   { background: rgba(91,139,255,0.10);  border-color: rgba(91,139,255,0.30);  color: var(--accent-blue);   }
+.rb-amber  { background: rgba(245,181,68,0.10);  border-color: rgba(245,181,68,0.30);  color: var(--accent-amber);  }
+.rb-green  { background: rgba(61,214,140,0.10);  border-color: rgba(61,214,140,0.30);  color: var(--accent-green);  }
+.rb-pink   { background: rgba(255,107,157,0.10); border-color: rgba(255,107,157,0.30); color: var(--accent-pink);   }
+
+/* ── CTA-карточка (@ваш_канал · Telegram) ── */
+.cta-card {
+  background: rgba(255,255,255,0.03);
+  border: 2px solid rgba(232,116,44,0.4);
+  border-radius: 28px; padding: 52px 48px; width: 100%;
+}
+.tg-squircle {
+  width: 100px; height: 100px; border-radius: 24px;
+  background: rgba(38,165,228,0.15); border: 1px solid rgba(38,165,228,0.3);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+/* ── Караоке-субтитры (полоса над зоной аватара, y 1080–1250) ── */
+#cap-band {
+  position: absolute; left: 0; top: var(--cap-top);
+  width: 1080px; height: var(--cap-h); z-index: 60;
+  pointer-events: none;
+}
+.cap-group {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; gap: 16px; align-items: center;
+  padding: 18px 40px; border-radius: 20px;
+  background: rgba(8,8,8,0.78);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  white-space: nowrap; opacity: 0;
+}
+.cap-word {
+  font: 800 48px/1 "Inter", system-ui, sans-serif;
+  letter-spacing: -0.01em; color: var(--muted);
+}
+
+/* ── CTA-скрин канала (assets/cta/tg-channel.jpg, с 2026-07-31) ── */
+.tg-shot {
+  border-radius: 22px; overflow: hidden; width: 520px;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+}
+.tg-shot img { display: block; width: 100%; }
+.tg-btn {
+  display: inline-flex; align-items: center; gap: 14px;
+  background: #26A5E4; color: #fff;
+  font: 800 32px/1 "Inter", sans-serif;
+  padding: 22px 48px; border-radius: 100px;
+  box-shadow: 0 12px 30px rgba(38,165,228,0.35);
+}
+.tg-cursor { position: absolute; width: 44px; pointer-events: none; }
+.tg-cursor path { fill: #fff; stroke: #111; stroke-width: 2; }
+
+/* ── Полноэкранный canvas для 3D-фона (Ярус 3) ── */
+.bg-canvas-3d {
+  position: absolute; top: 0; left: 0;
+  width: 1080px; height: 1920px; pointer-events: none; z-index: 0;
+}

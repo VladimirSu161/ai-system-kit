@@ -1,0 +1,181 @@
+<!doctype html><html lang="ru"><head><meta charset="UTF-8"/>
+<meta name="viewport" content="width=1080, height=1920"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+  :root{--bg:#050505;--text:#F5F5F5;--muted:#8A8A8A;--accent-amber:#F5B544;--accent-orange:#E8742C;--accent-blue:#5B8BFF;--accent-green:#3DD68C;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:var(--bg);
+            font-family:"Inter",system-ui,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+  #root{position:relative;width:1080px;height:1920px;overflow:hidden}
+  .clip{position:absolute}
+
+  #chart-wrap{
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:900px;
+  }
+  #chart-title{
+    font-size:44px;
+    font-weight:700;
+    color:var(--text);
+    text-align:center;
+    margin-bottom:16px;
+    letter-spacing:-0.01em;
+  }
+  #chart-subtitle{
+    font-size:26px;
+    font-weight:400;
+    color:var(--muted);
+    text-align:center;
+    margin-bottom:72px;
+    letter-spacing:0.04em;
+  }
+  #bars-area{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:48px;
+    height:480px;
+  }
+  .bar-col{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:160px;
+  }
+  .bar-value{
+    font-size:52px;
+    font-weight:800;
+    margin-bottom:16px;
+    font-variant-numeric:tabular-nums;
+    line-height:1;
+  }
+  .bar-track{
+    width:160px;
+    height:400px;
+    background:rgba(255,255,255,0.06);
+    border-radius:16px 16px 8px 8px;
+    display:flex;
+    align-items:flex-end;
+    overflow:hidden;
+  }
+  .bar-fill{
+    width:100%;
+    border-radius:12px 12px 0 0;
+    transform-origin:bottom center;
+    transform:scaleY(0);
+  }
+  .bar-label{
+    margin-top:20px;
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-family:"Courier New",monospace;
+    text-align:center;
+  }
+  /* цвета баров */
+  .bar-fill.c0{background:linear-gradient(180deg,#F5B544 0%,rgba(245,181,68,0.6) 100%);}
+  .bar-fill.c1{background:linear-gradient(180deg,#E8742C 0%,rgba(232,116,44,0.6) 100%);}
+  .bar-fill.c2{background:linear-gradient(180deg,#5B8BFF 0%,rgba(91,139,255,0.6) 100%);}
+  .bar-fill.c3{background:linear-gradient(180deg,#3DD68C 0%,rgba(61,214,140,0.6) 100%);}
+  .bar-value.c0{color:#F5B544;}
+  .bar-value.c1{color:#E8742C;}
+  .bar-value.c2{color:#5B8BFF;}
+  .bar-value.c3{color:#3DD68C;}
+</style></head><body>
+<div id="root" data-composition-id="chart-bars" data-width="1080" data-height="1920" data-start="0" data-duration="3">
+
+  <div id="chart-wrap" class="clip"
+       data-start="0" data-duration="3" data-track-index="0">
+    <div id="chart-title">РОСТ ИСПОЛЬЗОВАНИЯ AI</div>
+    <div id="chart-subtitle">% организаций, 2024</div>
+    <div id="bars-area">
+
+      <div class="bar-col">
+        <div class="bar-value c0" id="val0">0%</div>
+        <div class="bar-track">
+          <div class="bar-fill c0" id="bar0" style="height:40%"></div>
+        </div>
+        <div class="bar-label">GPT</div>
+      </div>
+
+      <div class="bar-col">
+        <div class="bar-value c1" id="val1">0%</div>
+        <div class="bar-track">
+          <div class="bar-fill c1" id="bar1" style="height:65%"></div>
+        </div>
+        <div class="bar-label">AUTO</div>
+      </div>
+
+      <div class="bar-col">
+        <div class="bar-value c2" id="val2">0%</div>
+        <div class="bar-track">
+          <div class="bar-fill c2" id="bar2" style="height:85%"></div>
+        </div>
+        <div class="bar-label">DATA</div>
+      </div>
+
+      <div class="bar-col">
+        <div class="bar-value c3" id="val3">0%</div>
+        <div class="bar-track">
+          <div class="bar-fill c3" id="bar3" style="height:55%"></div>
+        </div>
+        <div class="bar-label">CODE</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<script>
+  window.__timelines = window.__timelines || {};
+
+  const DATA = [
+    { id: "bar0", valId: "val0", target: 40 },
+    { id: "bar1", valId: "val1", target: 65 },
+    { id: "bar2", valId: "val2", target: 85 },
+    { id: "bar3", valId: "val3", target: 55 },
+  ];
+
+  const tl = gsap.timeline({ paused: true });
+
+  // Заголовок появляется
+  tl.from("#chart-title",    { opacity: 0, y: -24, duration: 0.45, ease: "power2.out" }, 0);
+  tl.from("#chart-subtitle", { opacity: 0, y: -16, duration: 0.35, ease: "power2.out" }, 0.15);
+
+  // Бары растут стаггером
+  DATA.forEach(function(d, i) {
+    const barEl = document.getElementById(d.id);
+    const valEl = document.getElementById(d.valId);
+    const proxy = { v: 0 };
+    const startAt = 0.45 + i * 0.12;
+
+    tl.to(barEl, {
+      scaleY: 1,
+      duration: 1.0,
+      ease: "power3.out"
+    }, startAt);
+
+    tl.to(proxy, {
+      v: d.target,
+      duration: 1.0,
+      ease: "power3.out",
+      onUpdate: function() {
+        valEl.textContent = Math.round(proxy.v) + "%";
+      }
+    }, startAt);
+  });
+
+  // Подписи снизу появляются
+  tl.from(".bar-label", {
+    opacity: 0,
+    y: 12,
+    duration: 0.3,
+    stagger: 0.08,
+    ease: "power2.out"
+  }, 0.5);
+
+  window.__timelines["chart-bars"] = tl;
+</script></body></html>
