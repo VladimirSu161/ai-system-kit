@@ -1,0 +1,39 @@
+# Рендеры и медиа — не версионируем (тяжёлые; восстанавливаются рендером).
+# Аудио-банки ставятся отдельно: scripts/setup-assets.sh (SFX из клона
+# video-shotcraft) и вручную с mixkit.co (BGM) — см. SETUP.md, шаг 5.
+renders/
+*.mp4
+*.mov
+*.mp3
+*.wav
+*.m4a
+
+# Вход, слоты и свой футаж — артефакты конкретного ролика и личные записи
+inbox/*
+!inbox/.gitkeep
+!inbox/_raw/.gitkeep
+!inbox/_done/.gitkeep
+!inbox/screenshots/.gitkeep
+queue/*
+!queue/.gitkeep
+footage/clips/*
+!footage/clips/.gitkeep
+
+# Ассеты конкретных роликов (звук, скрины, клипы) — не в репозиторий
+engine/public/videos/*
+!engine/public/videos/.gitkeep
+
+# Engine: зависимости и рендер-артефакты
+engine/node_modules/
+engine/out/
+engine/.remotion/
+
+# Кэш сборки и headless-браузер — лежат в КОРНЕ проекта, а не в engine/
+# (весят больше лимита GitHub в 100 МБ на файл)
+.cache/
+.remotion/
+out/*
+!out/.gitkeep
+
+# Системное
+.DS_Store
